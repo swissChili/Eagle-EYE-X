@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/">
+        <file>main.qml</file>
+        <file>Shadow.qml</file>
+        <file>Style.qml</file>
+        <file>qmldir</file>
+        <file>Label.qml</file>
+    </qresource>
+</RCC>
