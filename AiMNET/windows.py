@@ -46,6 +46,12 @@ def screenshot(contains):
 
     return img, hwnd
 
+# hard coded for now
+SCREEN_WIDTH = 1920
+SCREEN_HEIGHT = 1080
+
 def click_win_at(hwnd, x, y):
     wx, wy, ww, wh = win32.GetWindowRect(hwnd)
     win32api.SetCursorPos((x+wx, y+wy))
+    win32api.mouse_event(win32con.MOUSEEVENTF_MOVE | win32con.MOUSEEVENTF_ABSOLUTE,
+        int(x/SCREEN_WIDTH*65535.0), int(y/SCREEN_HEIGHT*65535.0))

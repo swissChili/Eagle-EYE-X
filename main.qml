@@ -11,6 +11,10 @@ Window {
     flags: Qt.FramelessWindowHint
     color: "transparent"
 
+    OverlayWindow {
+        visible: true
+    }
+
     Item {
         id: dragHeader
         anchors.fill: parent
