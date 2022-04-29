@@ -24,4 +24,29 @@ Window {
         anchors.centerIn: parent
         text: "eagle eye"
     }
+
+    Aimnet {
+        id: aimnet
+
+        onGotRect: (x, y, width, height) => {
+                       console.log({x, y, width, height});
+                   }
+    }
+
+    Repeater {
+        id: rectRepeater
+
+        model: aimnet.model
+
+        delegate: Rectangle {
+            x: modelData.x
+            y: modelData.y
+            width: modelData.width
+            height: modelData.height
+
+            color: "transparent"
+            border.width: 4
+            border.color: "red"
+        }
+    }
 }

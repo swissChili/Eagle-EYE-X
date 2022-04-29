@@ -33,11 +33,31 @@ int Overlay::y() const
     return _y;
 }
 
+static wchar_t buffer[256];
+
+static BOOL CALLBACK Overlay_windEnumFunc(HWND testHwnd, HWND *storeHwnd)
+{
+    GetWindowText(testHwnd, (LPWSTR)buffer, 256);
+
+    QString string = QString::fromWCharArray(buffer);
+
+    if (string.startsWith("Counter-Strike: Global Offensive"))
+    {
+        *storeHwnd = testHwnd;
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
 void Overlay::updatePosition()
 {
-    HWND hwnd = FindWindow(NULL, L"Microsoft Visual Studio");
+    static HWND hwnd = nullptr;
 
-    qDebug() << "Got HWND" << hwnd;
+    if (hwnd == nullptr)
+    {
+        EnumWindows((WNDENUMPROC)Overlay_windEnumFunc, (LPARAM)&hwnd);
+    }
 
     RECT wndRect;
     if (GetWindowRect(hwnd, &wndRect))
@@ -46,8 +66,6 @@ void Overlay::updatePosition()
         _height = wndRect.bottom - wndRect.top;
         _x = wndRect.left;
         _y = wndRect.top;
-
-        qDebug() << "Got rect" << _width << _height << _x << _y;
 
         emit widthChanged();
         emit heightChanged();

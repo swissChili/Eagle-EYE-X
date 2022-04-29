@@ -1,27 +1,49 @@
 # import some common libraries
 import numpy as np
-import cv2, torch
+import cv2
+import torch
+# import onnxruntime
+from PIL import Image
+import time
+
+yolov3_labels =["person","bicycle","car","motorbike","aeroplane","bus","train","truck","boat",
+    "traffic light","fire hydrant","stop sign","parking meter","bench","bird","cat",
+    "dog","horse","sheep","cow","elephant","bear","zebra","giraffe","backpack","umbrella",
+    "handbag","tie","suitcase","frisbee","skis","snowboard","sports ball","kite","baseball bat",
+    "baseball glove","skateboard","surfboard","tennis racket","bottle","wine glass","cup","fork",
+    "knife","spoon","bowl","banana","apple","sandwich","orange","broccoli","carrot","hot dog",
+    "pizza","donut","cake","chair","sofa","pottedplant","bed","diningtable","toilet","tvmonitor",
+    "laptop","mouse","remote","keyboard","cell phone","microwave","oven","toaster","sink",
+    "refrigerator","book","clock","vase","scissors","teddy bear","hair drier","toothbrush"]
 
 class Detector:
 	def __init__(self):
 		# self.face = yolo.face_analysis()
 		self.yolo = torch.hub.load('ultralytics/yolov5', 'yolov5s')
-		
-#		self.d2 = get_cfg()
-#		self.d2.merge_from_file(model_zoo.get_config_file('COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml'))
-#		self.d2.MODEL.ROI_HEADS.SCORE_THRESH_TEST = 0.5 # threshold
-#		self.d2.MODEL.WEIGHTS = model_zoo.get_checkpoint_url("COCO-InstanceSegmentation/mask_rcnn_R_50_FPN_3x.yaml")
-#		self.d2.MODEL.DEVICE = "cpu"
-#		self.d2_pred = DefaultPredictor(self.d2)
+		#self.onnx = onnxruntime.InferenceSession("yolov3.onnx", providers=['DmlExecutionProvider'])
+		#self.inname = [input.name for input in self.onnx.get_inputs()]
+		#self.outname = [output.name for output in self.onnx.get_outputs()]
 
-	# image - numpy array
-#	def detect_face(self, image):
-#		img, box, conf = self.face.face_detection(frame_arr=image,
-#			frame_status=True,
-#			model='tiny')
+	def letterbox_image(self, image, size):
+		iw, ih = image.size
+		w, h = size
+		scale = min(w/iw, h/ih)
+		nw = int(iw*scale)
+		nh = int(ih*scale)
 
-#		img_out = self.face.show_output(image, box, frame_status=True)
-#		cv2.imshow('Output', img_out)
+		image = image.resize((nw,nh), Image.BICUBIC)
+		new_image = Image.new('RGB', size, (128,128,128))
+		new_image.paste(image, ((w-nw)//2, (h-nh)//2))
+		return new_image
+
+	def preprocess(self, img):
+		model_image_size = (416, 416)
+		boxed_image = self.letterbox_image(img, tuple(reversed(model_image_size)))
+		image_data = np.array(boxed_image, dtype='float32')
+		image_data /= 255.
+		image_data = np.transpose(image_data, [2, 0, 1])
+		image_data = np.expand_dims(image_data, 0)
+		return image_data
 
 	# image - PIL image
 	def detect_body(self, image):
@@ -30,13 +52,24 @@ class Detector:
 
 		return list(ents[ents['name'] == 'person']['xmin ymin xmax ymax'.split(' ')].itertuples(index=False, name=None))
 
+	# image - PIL image
+#	def detect_body(self, image):
+#		image_data = self.preprocess(image)
+#		image_size = np.array([image.size[1], image.size[0]], dtype=np.float32).reshape(1, 2)
 
-#	def detectron2(self, image):
-#		outputs = self.d2_pred(image)
-#
-#		v = Visualizer(im[:, :, ::-1], MetadataCatalog.get(self.d2.DATASETS.TRAIN[0]), scale=1.2)
-#		out = v.draw_instance_predictions(outputs["instances"].to("cpu"))
-#		cv2.imshow(out.get_image()[:, :, ::-1])
+#		input = {
+#			self.inname[0]: image_data,
+#			self.inname[1]: image_size
+#		}
+
+#		t0 = time.time()
+#		boxes, scores, indices = self.onnx.run(self.outname, input)
+#		t1 = time.time()
+#		print("Took", t1-t0)
+#		for box, score, index in zip(boxes[0], scores[0], indices[0]):
+#			print('box', box)
+#			print('score', score)
+#			print('class', yolov3_labels[index])
 
 	# image - numpy array
 	def detect_opencv(self, image):

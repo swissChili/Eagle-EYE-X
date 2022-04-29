@@ -2,6 +2,15 @@ from PIL import ImageGrab, Image
 import win32gui as win32
 import win32api, win32con, win32ui
 from ctypes import windll
+from contextlib import contextmanager,redirect_stderr,redirect_stdout
+from os import devnull
+
+@contextmanager
+def quiet():
+    """A context manager that redirects stdout and stderr to devnull"""
+    with open(devnull, 'w') as fnull:
+        with redirect_stderr(fnull) as err, redirect_stdout(fnull) as out:
+            yield (err, out)
 
 def screenshot(contains):
     toplist, winlist = [], []
