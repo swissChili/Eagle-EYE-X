@@ -3,6 +3,7 @@
 #include <QObject>
 #include <QProcess>
 #include <qqml.h>
+#include <QTimer>
 
 // TODO: Create an AimnetRectangeAdapaterModel or something
 class Aimnet : public QObject
@@ -34,4 +35,6 @@ protected:
 private:
     QProcess *_aimnetProc;
     QVariantList _model;
+    QTimer _readTimer;
+    bool _startOfBatch = false;
 };

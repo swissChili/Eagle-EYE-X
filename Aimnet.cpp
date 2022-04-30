@@ -10,6 +10,9 @@ Aimnet::Aimnet(QObject *parent)
     : QObject{parent}
     , _aimnetProc{new QProcess(this)}
 {
+    _readTimer.setInterval(50);
+    connect(&_readTimer, &QTimer::timeout, this, &Aimnet::canRead);
+
     connect(_aimnetProc, &QProcess::readyReadStandardOutput, this, &Aimnet::canRead);
     connect(_aimnetProc, &QProcess::started, this, [&]()
     {
@@ -21,7 +24,7 @@ Aimnet::Aimnet(QObject *parent)
     });
     connect(_aimnetProc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &Aimnet::processFinished);
 
-    _aimnetProc->setProcessChannelMode(QProcess::ForwardedChannels);
+    // _aimnetProc->setProcessChannelMode(QProcess::ForwardedChannels);
     _aimnetProc->start("powershell.exe",
                        QStringList() << QDir::currentPath() + "/AiMNET/start.ps1"
                        , QIODevice::ReadOnly);
@@ -39,9 +42,8 @@ QVariantList Aimnet::model() const
 
 void Aimnet::canRead()
 {
-    if (_aimnetProc->canReadLine())
+    while (_aimnetProc->canReadLine())
     {
-        qDebug() << "Can read";
         readLine();
     }
 }
@@ -65,9 +67,6 @@ void Aimnet::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 // not by that much. Next idea: use a websocket.
 void Aimnet::readLine()
 {
-    QElapsedTimer timer;
-    timer.start();
-
     QByteArray line = _aimnetProc->readLine();
     QJsonParseError err;
     QJsonDocument doc = QJsonDocument::fromJson(line, &err);
@@ -82,6 +81,13 @@ void Aimnet::readLine()
 
     if (type == "body")
     {
+        if (_startOfBatch)
+        {
+            _model.clear();
+            emit modelChanged();
+            _startOfBatch = false;
+        }
+
         emit gotRect(object["x"].toInt(),
                 object["y"].toInt(),
                 object["width"].toInt(),
@@ -93,13 +99,11 @@ void Aimnet::readLine()
     else if (type == "batch_done")
     {
         emit batchCleared();
-        _model.clear();
-        emit modelChanged();
+        _startOfBatch = true;
+        qDebug() << _model;
     }
     else if (type == "time")
     {
         emit gotTime(object["ms"].toInt());
     }
-
-    qDebug() << "Processing line took" << timer.elapsed();
 }

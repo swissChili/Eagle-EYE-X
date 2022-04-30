@@ -1,4 +1,5 @@
 import json
+import sys
 
 def report_body(body):
 	x, y, x1, y1 = map(int, body)
@@ -29,3 +30,4 @@ def batch_done():
 	}
 
 	print(json.dumps(data))
+	sys.stdout.flush()
