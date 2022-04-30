@@ -2,6 +2,7 @@
 import numpy as np
 import cv2
 import torch
+import torch_hub
 # import onnxruntime
 from PIL import Image
 import time
@@ -19,7 +20,7 @@ yolov3_labels =["person","bicycle","car","motorbike","aeroplane","bus","train","
 class Detector:
 	def __init__(self):
 		# self.face = yolo.face_analysis()
-		self.yolo = torch.hub.load('ultralytics/yolov5', 'yolov5s')
+		self.yolo = torch_hub.load('ultralytics/yolov5', 'yolov5s')
 		#self.onnx = onnxruntime.InferenceSession("yolov3.onnx", providers=['DmlExecutionProvider'])
 		#self.inname = [input.name for input in self.onnx.get_inputs()]
 		#self.outname = [output.name for output in self.onnx.get_outputs()]

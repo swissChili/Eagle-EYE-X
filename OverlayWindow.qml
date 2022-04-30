@@ -27,10 +27,6 @@ Window {
 
     Aimnet {
         id: aimnet
-
-        onGotRect: (x, y, width, height) => {
-                       console.log({x, y, width, height});
-                   }
     }
 
     Repeater {
