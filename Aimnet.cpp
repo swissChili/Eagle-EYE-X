@@ -40,6 +40,11 @@ QVariantList Aimnet::model() const
     return _model;
 }
 
+QString Aimnet::statusMessage() const
+{
+    return _statusMessage;
+}
+
 void Aimnet::canRead()
 {
     while (_aimnetProc->canReadLine())
@@ -108,5 +113,10 @@ void Aimnet::readLine()
     else if (type == "time")
     {
         emit gotTime(object["ms"].toInt());
+    }
+    else if (type == "log")
+    {
+        _statusMessage = object["message"].toString();
+        emit statusMessageChanged();
     }
 }

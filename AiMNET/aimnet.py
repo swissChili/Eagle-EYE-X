@@ -10,13 +10,20 @@ import windows
 import detection
 
 # det.detect_face(img)
+
+ipc.status_update("Locating CS:GO")
+
 with windows.quiet():
     window_title = 'Counter-Strike: Global Offensive'
     if len(sys.argv) >= 2:
         window_title = sys.argv[1]
 
+ipc.status_update("Loading AiMNET model")
+
+with windows.quiet():
     det = detection.Detector()
 
+ipc.status_update("AiMNET active")
 
 color = (255, 0, 0)
 

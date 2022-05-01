@@ -67,4 +67,20 @@ Window {
         border.color: "red"
         border.width: 3
     }
+
+    Rectangle {
+        id: statusBg
+        color: Qt.rgba(0, 0, 0, 0.5)
+        anchors.fill: status
+        anchors.margins: -10
+        visible: aimnet.statusMessage.length > 0
+    }
+
+    Label {
+        id: status
+        x: 10
+        y: 10
+        text: aimnet.statusMessage
+        color: Style.red
+    }
 }

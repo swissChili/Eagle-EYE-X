@@ -47,3 +47,12 @@ def batch_done():
 
     print(json.dumps(data))
     sys.stdout.flush()
+
+def status_update(message):
+    data = {
+        "type": "log",
+        "message": message
+    }
+
+    print(json.dumps(data))
+    sys.stdout.flush()
