@@ -33,6 +33,11 @@ int Overlay::y() const
     return _y;
 }
 
+bool Overlay::hasFocus() const
+{
+    return _hasFocus;
+}
+
 static wchar_t buffer[256];
 
 static BOOL CALLBACK Overlay_windEnumFunc(HWND testHwnd, HWND *storeHwnd)
@@ -60,8 +65,18 @@ void Overlay::updatePosition()
     }
 
     RECT wndRect;
-    if (GetWindowRect(hwnd, &wndRect))
+    if (GetClientRect(hwnd, &wndRect))
     {
+        POINT clientPt = {0, 0};
+
+        if (ClientToScreen(hwnd, &clientPt))
+        {
+            wndRect.left += clientPt.x;
+            wndRect.right += clientPt.x;
+            wndRect.top += clientPt.y;
+            wndRect.bottom += clientPt.y;
+        }
+
         _width = wndRect.right - wndRect.left;
         _height = wndRect.bottom - wndRect.top;
         _x = wndRect.left;
@@ -71,5 +86,15 @@ void Overlay::updatePosition()
         emit heightChanged();
         emit xChanged();
         emit yChanged();
+    }
+
+    bool nextFocus = GetActiveWindow() == hwnd;
+
+    if (nextFocus != _hasFocus)
+    {
+        qDebug() << _hasFocus << nextFocus;
+
+        _hasFocus = nextFocus;
+        emit hasFocusChanged();
     }
 }

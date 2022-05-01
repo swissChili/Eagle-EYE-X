@@ -1,4 +1,4 @@
 cd $PSScriptRoot
 
-.\environment.ps1
+conda activate aimnet
 python aimnet.py

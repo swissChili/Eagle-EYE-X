@@ -77,8 +77,6 @@ void Aimnet::readLine()
     QJsonObject object = doc.object();
     QString type = object["type"].toString();
 
-    qDebug() << "Got line" << QString::fromLatin1(line);
-
     if (type == "body")
     {
         if (_startOfBatch)
@@ -98,9 +96,14 @@ void Aimnet::readLine()
     }
     else if (type == "batch_done")
     {
+        if (_startOfBatch)
+        {
+            _model.clear();
+            emit modelChanged();
+        }
+
         emit batchCleared();
         _startOfBatch = true;
-        qDebug() << _model;
     }
     else if (type == "time")
     {

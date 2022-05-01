@@ -11,6 +11,8 @@ Window {
            Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Sheet | Qt.WindowTransparentForInput
     color: "transparent"
 
+    visible: true
+
     x: overlay.x
     y: overlay.y
     width: overlay.width
@@ -18,11 +20,6 @@ Window {
 
     Overlay {
         id: overlay
-    }
-
-    Text {
-        anchors.centerIn: parent
-        text: "eagle eye"
     }
 
     Aimnet {
@@ -34,15 +31,40 @@ Window {
 
         model: aimnet.model
 
-        delegate: Rectangle {
-            x: modelData.x
-            y: modelData.y
-            width: modelData.width
-            height: modelData.height
+        delegate: Item {
+            Rectangle {
+                x: modelData.x
+                y: modelData.y
+                width: modelData.width
+                height: modelData.height
 
-            color: "transparent"
-            border.width: 4
-            border.color: "red"
+                color: "transparent"
+                border.width: 3
+                border.color: "#8BBE91"
+                radius: 8
+            }
+
+            Rectangle {
+                x: modelData.headX - 2
+                y: modelData.headY - 2
+                color: "yellow"
+                width: 4
+                height: 4
+            }
         }
+    }
+
+    Image {
+        source: "res/aim-reticle.svg"
+        anchors.centerIn: parent
+        width: 180
+        height: 180
+    }
+
+    Rectangle {
+        anchors.fill: parent
+        color: "transparent"
+        border.color: "red"
+        border.width: 3
     }
 }

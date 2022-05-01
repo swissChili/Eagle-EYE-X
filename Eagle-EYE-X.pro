@@ -33,3 +33,7 @@ HEADERS += \
     Overlay.h
 
 LIBS += -luser32 -lkernel32
+OTHER_FILES += AiMNET/*
+
+DISTFILES += \
+    AiMNET/actuator.py

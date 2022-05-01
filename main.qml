@@ -12,7 +12,6 @@ Window {
     color: "transparent"
 
     OverlayWindow {
-        visible: true
     }
 
     Item {
