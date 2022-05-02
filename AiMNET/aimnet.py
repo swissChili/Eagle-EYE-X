@@ -9,8 +9,6 @@ import ipc
 import windows
 import detection
 
-# det.detect_face(img)
-
 ipc.status_update("Locating CS:GO")
 
 with windows.quiet():
@@ -24,8 +22,6 @@ with windows.quiet():
     det = detection.Detector()
 
 ipc.status_update("AiMNET active")
-
-color = (255, 0, 0)
 
 last_time = time.time()
 
@@ -43,6 +39,8 @@ while True:
     ipc.batch_done()
 
 def display_results():
+    color = (255, 0, 0)
+
     for i, body in enumerate(bodies):
         x, y, x1, y1 = map(int, body)
         width = x1 - x

@@ -1,5 +1,6 @@
 import json
 import sys
+import queue
 
 # On small boxes, the head tends to be further down, on large ones, it's near the top.
 # we can just use a fixed pixel offset that works "good enough"

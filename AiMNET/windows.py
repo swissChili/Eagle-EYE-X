@@ -51,8 +51,6 @@ def screenshot(contains):
     save_dc.SelectObject(save_bitmap)
 
     result = windll.user32.PrintWindow(hwnd, save_dc.GetSafeHdc(), 2)
-    print('screenshot result', result)
-
     bmp_info = save_bitmap.GetInfo()
     bmp_str = save_bitmap.GetBitmapBits(True)
 
@@ -61,8 +59,6 @@ def screenshot(contains):
     img = Image.frombuffer('RGB', (bmp_info['bmWidth'], bmp_info['bmHeight']),
                            bmp_str, 'raw', 'BGRX', 0, 1)
     img = img.crop((offset_x, offset_y, offset_x + w, offset_y + h))
-
-    print('cropping', offset_x, offset_y, offset_x + w, offset_y + h, file=sys.stderr)
 
     win32.DeleteObject(save_bitmap.GetHandle())
     save_dc.DeleteDC()

@@ -24,6 +24,30 @@ Window {
 
     Aimnet {
         id: aimnet
+
+        onModelChanged: {
+            for (let {headX, headY} of model)
+            {
+                if (withinReticle(headX, headY))
+                {
+                    actuator.shootAt(headX, headY);
+                }
+            }
+        }
+    }
+
+    function withinReticle(x, y)
+    {
+        let cx = overlay.width / 2, cy = overlay.height / 2;
+        let r = 50;
+        return (x > cx - r) && (x < cx + r) && (y > cy - r) && (y < cy + r);
+    }
+
+    Actuator {
+        id: actuator
+
+        width: overlay.width
+        height: overlay.height
     }
 
     Repeater {
@@ -57,8 +81,8 @@ Window {
     Image {
         source: "res/aim-reticle.svg"
         anchors.centerIn: parent
-        width: 180
-        height: 180
+        width: 100
+        height: 100
     }
 
     Rectangle {

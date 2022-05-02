@@ -11,6 +11,7 @@ QML_IMPORT_MINOR_VERSION = 0
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+        Actuator.cpp \
         Aimnet.cpp \
         Overlay.cpp \
         main.cpp
@@ -29,6 +30,7 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
 
 HEADERS += \
+    Actuator.h \
     Aimnet.h \
     Overlay.h
 
@@ -36,4 +38,5 @@ LIBS += -luser32 -lkernel32
 OTHER_FILES += AiMNET/*
 
 DISTFILES += \
-    AiMNET/actuator.py
+    AiMNET/actuator.py \
+    AiMNET/test_input.txt

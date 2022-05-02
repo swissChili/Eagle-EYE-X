@@ -1,7 +1,6 @@
-import mouse
-
+import actuator
 import time
 
-time.sleep(4)
+time.sleep(1)
 
-mouse.move(200, 200)
+actuator.shoot_at(60, 60)
