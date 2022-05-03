@@ -1,6 +1,6 @@
 QT += quick websockets
 
-CONFIG += c++11 qmltypes
+CONFIG += c++14 qmltypes
 
 QML_IMPORT_NAME = com.eagleeyex.EagleEYEX
 QML_IMPORT_MAJOR_VERSION = 1

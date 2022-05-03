@@ -2,6 +2,7 @@
 #include <QThread>
 #include <Windows.h>
 #include <QtMath>
+#include <QPoint>
 
 Actuator::Actuator(QObject *parent)
     : QObject{parent}
