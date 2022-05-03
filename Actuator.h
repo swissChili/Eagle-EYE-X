@@ -59,7 +59,7 @@ signals:
 
 private:
     int _width = 0, _height = 0;
-    int _minTimeBetweenShots = 80;
+    int _minTimeBetweenShots = 40;
     QTime _lastShot = QTime::currentTime();
     ActuatorWorker *_worker;
 };

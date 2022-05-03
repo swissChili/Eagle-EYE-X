@@ -39,7 +39,7 @@ Window {
     function withinReticle(x, y)
     {
         let cx = overlay.width / 2, cy = overlay.height / 2;
-        let r = 50;
+        let r = 100;
         return (x > cx - r) && (x < cx + r) && (y > cy - r) && (y < cy + r);
     }
 
@@ -81,8 +81,8 @@ Window {
     Image {
         source: "res/aim-reticle.svg"
         anchors.centerIn: parent
-        width: 100
-        height: 100
+        width: 200
+        height: 200
     }
 
     Rectangle {
