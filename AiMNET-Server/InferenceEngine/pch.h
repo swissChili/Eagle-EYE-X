@@ -21,8 +21,6 @@
 
 // DirectX apps don't need GDI
 #define NODRAWTEXT
-#define NOGDI
-#define NOBITMAP
 
 // Include <mcx.h> if you need this
 #define NOMCX
@@ -33,7 +31,6 @@
 // WinHelp is deprecated
 #define NOHELP
 
-#define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
 #include <wrl/client.h>
@@ -94,6 +91,7 @@
 #include "SpriteBatch.h"
 #include "SpriteFont.h"
 #include "VertexTypes.h"
+#include "WindowCapture.h"
 
 #define DML_TARGET_VERSION_USE_LATEST
 #include "DirectML.h"

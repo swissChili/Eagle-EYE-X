@@ -9,19 +9,19 @@
 
 // Media Foundation needs this, but it seems to be compiled out (of wingdi.h) on Desktop.
 // Not sure why; MF should support Desktop fine.
-typedef struct tagBITMAPINFOHEADER {
-    DWORD      biSize;
-    LONG       biWidth;
-    LONG       biHeight;
-    WORD       biPlanes;
-    WORD       biBitCount;
-    DWORD      biCompression;
-    DWORD      biSizeImage;
-    LONG       biXPelsPerMeter;
-    LONG       biYPelsPerMeter;
-    DWORD      biClrUsed;
-    DWORD      biClrImportant;
-} BITMAPINFOHEADER, FAR *LPBITMAPINFOHEADER, *PBITMAPINFOHEADER;
+//typedef struct tagBITMAPINFOHEADER {
+//    DWORD      biSize;
+//    LONG       biWidth;
+//    LONG       biHeight;
+//    WORD       biPlanes;
+//    WORD       biBitCount;
+//    DWORD      biCompression;
+//    DWORD      biSizeImage;
+//    LONG       biXPelsPerMeter;
+//    LONG       biYPelsPerMeter;
+//    DWORD      biClrUsed;
+//    DWORD      biClrImportant;
+//} BITMAPINFOHEADER, FAR *LPBITMAPINFOHEADER, *PBITMAPINFOHEADER;
 
 #include <mfapi.h>
 #include <mfmediaengine.h>

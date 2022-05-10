@@ -9,6 +9,7 @@
 #include "StepTimer.h"
 #include "MediaEnginePlayer.h"
 #include "WeightData.h"
+#include "WindowCapture.h"
 
 namespace YoloV4Constants
 {
@@ -193,6 +194,9 @@ private:
         const ModelOutput& modelOutput,
         const YoloV4Constants::BBoxData& constants,
         std::vector<Prediction>* out);
+
+    // Window Capture
+    WindowCapture                                   m_windowCapture;
 
     // Device resources
     std::unique_ptr<DX::DeviceResources>            m_deviceResources;

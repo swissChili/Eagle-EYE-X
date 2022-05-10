@@ -75,6 +75,9 @@
     <ClInclude Include="..\DirectML\DirectMLX.h">
       <Filter>DirectML</Filter>
     </ClInclude>
+    <ClInclude Include="WindowCapture.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="yolov4.cpp">
@@ -99,6 +102,9 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="WeightLoader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="WindowCapture.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
@@ -137,26 +143,11 @@
     <None Include="Media\Fonts\XboxOneControllerLegendSmall.spritefont">
       <Filter>Assets</Filter>
     </None>
-    <None Include="Media\Fonts\SegoeUI_18.spritefont">
-      <Filter>Assets</Filter>
-    </None>
-    <None Include="Media\Fonts\SegoeUI_30.spritefont">
-      <Filter>Assets</Filter>
-    </None>
-    <None Include="Media\Fonts\SegoeUI_30_Bold.spritefont">
-      <Filter>Assets</Filter>
-    </None>
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Manifest Include="settings.manifest">
       <Filter>Assets</Filter>
     </Manifest>
-  </ItemGroup>
-  <ItemGroup>
-    <CopyFileToFolders Include="Assets\grca-BA-bike-shop_1280x720.jpg">
-      <Filter>Resource Files</Filter>
-    </CopyFileToFolders>
-    <CopyFileToFolders Include="Assets\grca-grand-canyon-association-park-store_1280x720.mp4" />
   </ItemGroup>
 </Project>

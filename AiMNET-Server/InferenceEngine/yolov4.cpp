@@ -898,60 +898,6 @@ void Sample::CreateTextureResources()
         m_indexBufferView.SizeInBytes = sizeof(s_indexData);
     }
 
-#if USE_VIDEO
-    // Create video player.
-    {
-        wchar_t buff[MAX_PATH]; 
-        DX::FindMediaFile(buff, MAX_PATH, c_videoPath);
-
-        m_player = std::make_unique<MediaEnginePlayer>();
-        m_player->Initialize(m_deviceResources->GetDXGIFactory(), device, DXGI_FORMAT_B8G8R8A8_UNORM);
-        m_player->SetSource(buff);
-
-        while (!m_player->IsInfoReady())
-        {
-            SwitchToThread();
-        }
-
-        m_player->GetNativeVideoSize(m_origTextureWidth, m_origTextureHeight);
-        m_player->SetLoop(true);
-
-        // Create texture to receive video frames.
-        CD3DX12_RESOURCE_DESC desc(
-            D3D12_RESOURCE_DIMENSION_TEXTURE2D,
-            0,
-            m_origTextureWidth,
-            m_origTextureHeight,
-            1,
-            1,
-            DXGI_FORMAT_B8G8R8A8_UNORM,
-            1,
-            0,
-            D3D12_TEXTURE_LAYOUT_UNKNOWN,
-            D3D12_RESOURCE_FLAG_ALLOW_RENDER_TARGET | D3D12_RESOURCE_FLAG_ALLOW_SIMULTANEOUS_ACCESS);
-
-        CD3DX12_HEAP_PROPERTIES defaultHeapProperties(D3D12_HEAP_TYPE_DEFAULT);
-
-        DX::ThrowIfFailed(
-            device->CreateCommittedResource(
-                &defaultHeapProperties,
-                D3D12_HEAP_FLAG_SHARED,
-                &desc,
-                D3D12_RESOURCE_STATE_NON_PIXEL_SHADER_RESOURCE,
-                nullptr,
-                IID_PPV_ARGS(m_videoTexture.ReleaseAndGetAddressOf())));
-
-        DX::ThrowIfFailed(
-            device->CreateSharedHandle(
-                m_videoTexture.Get(),
-                nullptr,
-                GENERIC_ALL,
-                nullptr,
-                &m_sharedVideoTexture));
-
-        CreateShaderResourceView(device, m_videoTexture.Get(), m_SRVDescriptorHeap->GetCpuHandle(e_descTexture));
-    }
-#else
     // Create static texture.
     {
         auto commandList = m_deviceResources->GetCommandList();
@@ -969,7 +915,7 @@ void Sample::CreateTextureResources()
         // DX::FindMediaFile(buff, MAX_PATH, c_imagePath);
 
         UINT width, height;
-        auto image = LoadBGRAImage(buff, width, height);
+        std::vector<uint8_t> image = m_windowCapture.Capture(&width, &height); // LoadBGRAImage(buff, width, height);
         txtDesc.Width = m_origTextureWidth = width;
         txtDesc.Height = m_origTextureHeight = height;
 
@@ -1016,7 +962,6 @@ void Sample::CreateTextureResources()
         // Wait until assets have been uploaded to the GPU.
         m_deviceResources->WaitForGpu();
     }
-#endif
 }
 
 void Sample::CreateUIResources()
