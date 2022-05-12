@@ -17,5 +17,5 @@ protected:
 	static BOOL CALLBACK EnumProc(HWND testHwnd, WindowCapture *_this);
 
 	HWND m_target = nullptr;
-	std::wstring m_prefix = L"test.txt"; // L"Counter-Strike: Global Offensive";
+	std::wstring m_prefix = L"Counter-Strike: Global Offensive";
 };

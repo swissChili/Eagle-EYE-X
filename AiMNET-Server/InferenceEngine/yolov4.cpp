@@ -207,6 +207,7 @@ void InferenceEngine::Tick()
         Update(m_timer);
     });
 
+    TakeAndUploadScreenshot();
     Render();
 }
 

@@ -15,7 +15,7 @@ using namespace DirectX;
 
 namespace
 {
-    std::unique_ptr<InferenceEngine> g_sample;
+    std::unique_ptr<InferenceEngine> g_inference;
 };
 
 LPCWSTR g_szAppName = L"yolov4";
@@ -30,10 +30,9 @@ extern "C"
 }
 
 // Entry point
-int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
+int WINAPI main()
 {
-    UNREFERENCED_PARAMETER(hPrevInstance);
-    UNREFERENCED_PARAMETER(lpCmdLine);
+    HINSTANCE hInstance = GetModuleHandle(nullptr);
 
     //WindowCapture capture;
     //UINT width, height;
@@ -50,7 +49,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     if (FAILED(initialize))
         return 1;
 
-    g_sample = std::make_unique<InferenceEngine>();
+    g_inference = std::make_unique<InferenceEngine>();
 
     // Register class and create window
     {
@@ -73,7 +72,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
         // Create window
         int w, h;
-        g_sample->GetDefaultSize(w, h);
+        g_inference->GetDefaultSize(w, h);
 
         RECT rc;
         rc.top = 0;
@@ -92,14 +91,14 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
         if (!hwnd)
             return 1;
 
-        ShowWindow(hwnd, nCmdShow);
+        ShowWindow(hwnd, SW_NORMAL);
         // Change nCmdShow to SW_SHOWMAXIMIZED to default to fullscreen.
 
-        SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(g_sample.get()) );
+        SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(g_inference.get()) );
 
         GetClientRect(hwnd, &rc);
 
-        g_sample->Initialize(hwnd, rc.right - rc.left, rc.bottom - rc.top);
+        g_inference->Initialize(hwnd, rc.right - rc.left, rc.bottom - rc.top);
     }
 
     // Main message loop
@@ -113,11 +112,11 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
         }
         else
         {
-            g_sample->Tick();
+            g_inference->Tick();
         }
     }
 
-    g_sample.reset();
+    g_inference.reset();
 
     CoUninitialize();
 
