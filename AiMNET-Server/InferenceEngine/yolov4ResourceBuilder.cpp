@@ -330,6 +330,8 @@ dml::Expression DecodeModelOutput(dml::Expression output, uint32_t numClasses)
 
 void InferenceEngine::CreateDirectMLResources()
 {
+    LogMessage("Loading ML Resources");
+
     auto device = m_deviceResources->GetD3DDevice();
 
     // Shader for converting texture to tensor
@@ -467,6 +469,7 @@ void InferenceEngine::CreateDirectMLResources()
         auto lbbox = DecodeModelOutput(convLBBox, YoloV4Constants::c_numClasses);
 
         // Load the model weights from file
+        LogMessage("Loading Model");
         m_modelWeights = model.LoadWeightDataFromFile(LR"(.\Data\yolov4.weights)", m_deviceResources.get());
 
         // Compile the model into a DML graph

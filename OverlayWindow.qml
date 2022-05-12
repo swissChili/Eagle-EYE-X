@@ -39,7 +39,7 @@ Window {
     function withinReticle(x, y)
     {
         let cx = overlay.width / 2, cy = overlay.height / 2;
-        let r = 100;
+        let r = reticle.width / 2;
         return (x > cx - r) && (x < cx + r) && (y > cy - r) && (y < cy + r);
     }
 
@@ -78,11 +78,15 @@ Window {
         }
     }
 
-    Image {
-        source: "res/aim-reticle.svg"
+    Rectangle {
+        id: reticle
         anchors.centerIn: parent
-        width: 200
-        height: 200
+        color: "transparent"
+        border.color: "#E5B63C"
+        width: 100
+        height: 100
+        border.width: 3
+        radius: 8
     }
 
     Rectangle {

@@ -185,17 +185,23 @@ InferenceEngine::~InferenceEngine()
 // Initialize the Direct3D resources required to run.
 void InferenceEngine::Initialize(HWND window, int width, int height)
 {
+    LogMessage("AiMNET Initializing");
+
     m_gamePad = std::make_unique<GamePad>();
 
     m_keyboard = std::make_unique<Keyboard>();
     
     m_deviceResources->SetWindow(window, width, height);
 
+    LogMessage("Creating Device Resources");
     m_deviceResources->CreateDeviceResources();  	
     CreateDeviceDependentResources();
 
+    LogMessage("Creating Windows Resources");
     m_deviceResources->CreateWindowSizeDependentResources();
     CreateWindowSizeDependentResources();
+
+    LogMessage("AiMNET Ready");
 }
 
 #pragma region Frame Update
@@ -209,6 +215,9 @@ void InferenceEngine::Tick()
 
     TakeAndUploadScreenshot();
     Render();
+
+    std::cout << "{\"type\": \"batch_done\"}\r\n";
+    std::cout.flush();
 }
 
 // Updates the world.
@@ -276,8 +285,18 @@ void InferenceEngine::Update(DX::StepTimer const& timer)
     }
 
     PIXEndEvent();
+
+    std::cout << R"({"type": "time", "ms": )" << int(elapsedTime * 1000) << "}\r\n";
+    std::cout.flush();
 }
 #pragma endregion
+
+void InferenceEngine::LogMessage(std::string message)
+{
+    std::cout << R"({"type": "log", "message": ")" << message << "\"}\r\n";
+    std::cout.flush();
+}
+
 
 void InferenceEngine::GetModelPredictions(
     const ModelOutput& modelOutput,
@@ -322,9 +341,10 @@ void InferenceEngine::GetModelPredictions(
     std::vector<PotentialPrediction> tensorData = CopyReadbackHeap<PotentialPrediction>(modelOutput.readback.Get());
 
     // Scale the boxes to be relative to the original image size
-    auto viewport = m_deviceResources->GetScreenViewport();
-    float xScale = (float)viewport.Width / YoloV4Constants::c_inputWidth;
-    float yScale = (float)viewport.Height / YoloV4Constants::c_inputHeight;
+    int gameWidth, gameHeight;
+    GetGameSize(&gameWidth, &gameHeight);
+    float xScale = (float)gameWidth / YoloV4Constants::c_inputWidth;
+    float yScale = (float)gameHeight / YoloV4Constants::c_inputHeight;
 
     uint32_t currentPredIndex = 0;
     for (uint32_t n = 0; n < predTensorN; ++n)
@@ -369,10 +389,10 @@ void InferenceEngine::GetModelPredictions(
                 ymax *= yScale;
 
                 // Clip values out of range
-                xmin = std::clamp(xmin, 0.0f, (float)viewport.Width);
-                ymin = std::clamp(ymin, 0.0f, (float)viewport.Height);
-                xmax = std::clamp(xmax, 0.0f, (float)viewport.Width);
-                ymax = std::clamp(ymax, 0.0f, (float)viewport.Height);
+                xmin = std::clamp(xmin, 0.0f, (float)gameWidth);
+                ymin = std::clamp(ymin, 0.0f, (float)gameHeight);
+                xmax = std::clamp(xmax, 0.0f, (float)gameWidth);
+                ymax = std::clamp(ymax, 0.0f, (float)gameHeight);
 
                 // Discard invalid boxes
                 if (xmax <= xmin || ymax <= ymin || IsInfOrNan({ xmin, ymin, xmax, ymax }))
@@ -441,19 +461,7 @@ void InferenceEngine::Render()
         
         PIXEndEvent(commandList);
     }
-    
-    // Render the UI
-    {
-        PIXBeginEvent(commandList, PIX_COLOR_DEFAULT, L"Render UI");
-
-        commandList->RSSetViewports(1, &viewport);
-        commandList->RSSetScissorRects(1, &scissorRect);
-
-        auto size = m_deviceResources->GetOutputSize();
-        auto safe = SimpleMath::Viewport::ComputeTitleSafeArea(size.right, size.bottom);
-
-        PIXEndEvent(commandList);
-    }
+  
 
     // Readback the raw data from the model, compute the model's predictions, and render the bounding boxes
     {
@@ -472,20 +480,33 @@ void InferenceEngine::Render()
         if (preds.size() != 0)
         {
             std::stringstream ss;
-            Format(ss, "# of predictions: ", preds.size(), "\n");
+            // Format(ss, "# of predictions: ", preds.size(), "\n");
             
             for (const auto& pred : preds)
             {
-                const char* className = YoloV4Constants::c_classes[pred.predictedClass];
-                int xmin = static_cast<int>(std::round(pred.xmin));
-                int ymin = static_cast<int>(std::round(pred.ymin));
-                int xmax = static_cast<int>(std::round(pred.xmax));
-                int ymax = static_cast<int>(std::round(pred.ymax));
+                if (pred.predictedClass == YoloV4Constants::PersonClass)
+                {
+                    int xmin = static_cast<int>(std::round(pred.xmin));
+                    int ymin = static_cast<int>(std::round(pred.ymin));
+                    int xmax = static_cast<int>(std::round(pred.xmax));
+                    int ymax = static_cast<int>(std::round(pred.ymax));
 
-                Format(ss, "  ", className, ": score ", pred.score, ", box (", xmin, ",", ymin, "),(", xmax, ",", ymax, ")\n");
+                    int width = xmax - xmin;
+                    int height = ymax - ymin;
+
+                    int headX = xmin + width / 2;
+                    int headY = ymin + 12; // head offset
+                    
+                    Format(ss, "{\"type\": \"body\", \"x\": ", xmin, ", \"y\": ", ymin,
+                        ", \"width\": ", width, ", \"height\": ", height,
+                        ", \"headX\": ", headX,
+                        ", \"headY\": ", headY,
+                        "}\r\n");
+                }
             }
 
-            OutputDebugStringA(ss.str().c_str());
+            std::cout << ss.str();
+            std::cout.flush();
 
             commandList->RSSetViewports(1, &viewport);
             commandList->RSSetScissorRects(1, &scissorRect);
@@ -648,9 +669,15 @@ void InferenceEngine::OnWindowSizeChanged(int width, int height)
 // Properties
 void InferenceEngine::GetDefaultSize(int& width, int& height) const
 {
-    width = 1920;
-    height = 1080;
+    width = 320;
+    height = 240;
 }
+
+void InferenceEngine::GetGameSize(int *width, int *height)
+{
+    m_windowCapture.GetWindowSize(width, height);
+}
+
 #pragma endregion
 
 #pragma region Direct3D Resources

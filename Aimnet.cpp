@@ -21,18 +21,22 @@ Aimnet::Aimnet(QObject *parent)
     connect(_aimnetProc, &QProcess::errorOccurred, this, [&](auto err)
     {
         qDebug() << "Error" << err;
+        _statusMessage = "AiMNET Crashed: " + err;
+        emit statusMessageChanged();
     });
     connect(_aimnetProc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &Aimnet::processFinished);
 
     // _aimnetProc->setProcessChannelMode(QProcess::ForwardedChannels);
-    _aimnetProc->start("powershell.exe",
-                       QStringList() << QDir::currentPath() + "/AiMNET/start.ps1"
-                       , QIODevice::ReadOnly);
+    _aimnetProc->setWorkingDirectory(".\\AiMNET-Server\\x64\\Debug\\InferenceEngine");
+    _aimnetProc->start(".\\AiMNET-Server\\x64\\Debug\\InferenceEngine\\InferenceEngine.exe",
+                       QStringList(),
+                       QIODevice::ReadOnly);
 }
 
 Aimnet::~Aimnet()
 {
     _aimnetProc->terminate();
+    _aimnetProc->kill();
 }
 
 QVariantList Aimnet::model() const
@@ -60,16 +64,6 @@ void Aimnet::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
     qDebug() << "stderr" << outerr;
 }
 
-// TODO: BUG:
-// For some reason this function is SUPER delayed. Like it takes ~10-15 seconds to get through
-// the 4 lines of JSON that AiMNET sends. The ~200 ms timings that get sent from python *are* accurate,
-// it's something on the C++ end because if you move around, the results get "unsynced" and show
-// old positions of players.
-// If this data was being queued somewhere, it would appear in a process's memory, but both C++
-// and Python executables are stable at around ~200MB each, which seems correct. Maybe that means
-// the data is getting lost in the pipe?
-// Next step to debug: forward all stdout and see if it's delayed too. Yes, it appears delayed, but
-// not by that much. Next idea: use a websocket.
 void Aimnet::readLine()
 {
     QByteArray line = _aimnetProc->readLine();

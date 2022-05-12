@@ -57,7 +57,7 @@ std::vector<uint8_t> WindowCapture::Capture(UINT *width, UINT *height)
 	GetTempPathW(MAX_PATH, tempPath);
 	std::wstring path = std::wstring(tempPath) + L"\\aimnet-tmp.png";
 
-	image.Save(path.data());
+	DX::ThrowIfFailed(image.Save(path.data()));
 
 	return LoadBGRAImage(path.data(), *width, *height);
 
@@ -105,4 +105,12 @@ std::vector<uint8_t> WindowCapture::Capture(UINT *width, UINT *height)
 	//		//buffer.push_back(0xFF);
 	//	}
 	//}
+}
+
+void WindowCapture::GetWindowSize(int *width, int *height) const
+{
+	RECT rect;
+	GetClientRect(m_target, &rect);
+	*width = rect.right;
+	*height = rect.bottom;
 }

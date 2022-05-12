@@ -18,7 +18,7 @@ namespace
     std::unique_ptr<InferenceEngine> g_inference;
 };
 
-LPCWSTR g_szAppName = L"yolov4";
+LPCWSTR g_szAppName = L"InferenceEngine";
 
 LRESULT CALLBACK WndProc(HWND, UINT, WPARAM, LPARAM);
 
@@ -91,7 +91,7 @@ int WINAPI main()
         if (!hwnd)
             return 1;
 
-        ShowWindow(hwnd, SW_NORMAL);
+        //ShowWindow(hwnd, SW_NORMAL);
         // Change nCmdShow to SW_SHOWMAXIMIZED to default to fullscreen.
 
         SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(g_inference.get()) );
@@ -136,14 +136,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     static bool s_fullscreen = false;
     // Set s_fullscreen to true if defaulting to fullscreen.
 
-    auto sample = reinterpret_cast<InferenceEngine*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+    auto inference = reinterpret_cast<InferenceEngine*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
     switch (message)
     {
     case WM_PAINT:
-        if (s_in_sizemove && sample)
+        if (s_in_sizemove && inference)
         {
-            sample->Tick();
+            inference->Tick();
         }
         else
         {
@@ -153,9 +153,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_MOVE:
-        if (sample)
+        if (inference)
         {
-            sample->OnWindowMoved();
+            inference->OnWindowMoved();
         }
         break;
 
@@ -165,21 +165,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (!s_minimized)
             {
                 s_minimized = true;
-                if (!s_in_suspend && sample)
-                    sample->OnSuspending();
+                if (!s_in_suspend && inference)
+                    inference->OnSuspending();
                 s_in_suspend = true;
             }
         }
         else if (s_minimized)
         {
             s_minimized = false;
-            if (s_in_suspend && sample)
-                sample->OnResuming();
+            if (s_in_suspend && inference)
+                inference->OnResuming();
             s_in_suspend = false;
         }
-        else if (!s_in_sizemove && sample)
+        else if (!s_in_sizemove && inference)
         {
-            sample->OnWindowSizeChanged(LOWORD(lParam), HIWORD(lParam));
+            inference->OnWindowSizeChanged(LOWORD(lParam), HIWORD(lParam));
         }
         break;
 
@@ -189,12 +189,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_EXITSIZEMOVE:
         s_in_sizemove = false;
-        if (sample)
+        if (inference)
         {
             RECT rc;
             GetClientRect(hWnd, &rc);
 
-            sample->OnWindowSizeChanged(rc.right - rc.left, rc.bottom - rc.top);
+            inference->OnWindowSizeChanged(rc.right - rc.left, rc.bottom - rc.top);
         }
         break;
 
@@ -207,18 +207,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_ACTIVATEAPP:
-        if (sample)
+        if (inference)
         {
             Keyboard::ProcessMessage(message, wParam, lParam);
             Mouse::ProcessMessage(message, wParam, lParam);
 
             if (wParam)
             {
-                sample->OnActivated();
+                inference->OnActivated();
             }
             else
             {
-                sample->OnDeactivated();
+                inference->OnDeactivated();
             }
         }
         break;
@@ -227,16 +227,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         switch (wParam)
         {
         case PBT_APMQUERYSUSPEND:
-            if (!s_in_suspend && sample)
-                sample->OnSuspending();
+            if (!s_in_suspend && inference)
+                inference->OnSuspending();
             s_in_suspend = true;
             return TRUE;
 
         case PBT_APMRESUMESUSPEND:
             if (!s_minimized)
             {
-                if (s_in_suspend && sample)
-                    sample->OnResuming();
+                if (s_in_suspend && inference)
+                    inference->OnResuming();
                 s_in_suspend = false;
             }
             return TRUE;
@@ -269,35 +269,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_SYSKEYDOWN:
-        if (wParam == VK_RETURN && (lParam & 0x60000000) == 0x20000000)
-        {
-            // Implements the classic ALT+ENTER fullscreen toggle
-            if (s_fullscreen)
-            {
-                SetWindowLongPtr(hWnd, GWL_STYLE, WS_OVERLAPPEDWINDOW);
-                SetWindowLongPtr(hWnd, GWL_EXSTYLE, 0);
-
-                int width = 800;
-                int height = 600;
-                if (sample)
-                    sample->GetDefaultSize(width, height);
-
-                ShowWindow(hWnd, SW_SHOWNORMAL);
-
-                SetWindowPos(hWnd, HWND_TOP, 0, 0, width, height, SWP_NOMOVE | SWP_NOZORDER | SWP_FRAMECHANGED);
-            }
-            else
-            {
-                SetWindowLongPtr(hWnd, GWL_STYLE, 0);
-                SetWindowLongPtr(hWnd, GWL_EXSTYLE, WS_EX_TOPMOST);
-
-                SetWindowPos(hWnd, HWND_TOP, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
-
-                ShowWindow(hWnd, SW_SHOWMAXIMIZED);
-            }
-
-            s_fullscreen = !s_fullscreen;
-        }
         Keyboard::ProcessMessage(message, wParam, lParam);
         break;
 

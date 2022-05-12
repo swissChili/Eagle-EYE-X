@@ -13,6 +13,8 @@
 
 namespace YoloV4Constants
 {
+    static uint32_t PersonClass = 0;
+
     // The classes of objects that yolov4 can detect
     static const char* const c_classes[] =
     {
@@ -177,6 +179,9 @@ private:
     void CreateWindowSizeDependentResources();
 
     void TakeAndUploadScreenshot();
+    void GetGameSize(int *width, int *height);
+
+    void LogMessage(std::string message);
 
     struct ModelOutput
     {

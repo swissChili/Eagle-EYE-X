@@ -13,6 +13,8 @@ public:
 	/// <returns>The image in BGRA format with 8 bits per channel.</returns>
 	std::vector<uint8_t> Capture(UINT *width, UINT *height);
 
+	void GetWindowSize(int *width, int *height) const;
+
 protected:
 	static BOOL CALLBACK EnumProc(HWND testHwnd, WindowCapture *_this);
 

@@ -13,7 +13,6 @@
 *.so
 *.so.*
 *_pch.h.cpp
-*_resource.rc
 *.qm
 .#*
 *.*#
@@ -23,7 +22,6 @@ tags
 .DS_Store
 .directory
 *.debug
-Makefile*
 *.prl
 *.app
 moc_*.cpp
@@ -31,7 +29,6 @@ ui_*.h
 qrc_*.cpp
 Thumbs.db
 *.res
-*.rc
 /.qmake.cache
 /.qmake.stash
 
