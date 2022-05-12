@@ -328,7 +328,7 @@ dml::Expression DecodeModelOutput(dml::Expression output, uint32_t numClasses)
     return dml::Identity(dml::Reinterpret(joined, sizesNhwc, stridesNhwc));
 }
 
-void Sample::CreateDirectMLResources()
+void InferenceEngine::CreateDirectMLResources()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
@@ -550,7 +550,7 @@ void Sample::CreateDirectMLResources()
     }
 }
 
-void Sample::InitializeDirectMLResources()
+void InferenceEngine::InitializeDirectMLResources()
 {
     auto commandList = m_deviceResources->GetCommandList();
     commandList->Reset(m_deviceResources->GetCommandAllocator(), nullptr);

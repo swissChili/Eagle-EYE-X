@@ -40,53 +40,6 @@ namespace
         bool UseNhwc;
     };
 
-    std::vector<uint8_t> LoadBGRAImage(const wchar_t* filename, uint32_t& width, uint32_t& height)
-    {
-        ComPtr<IWICImagingFactory> wicFactory;
-        DX::ThrowIfFailed(CoCreateInstance(CLSID_WICImagingFactory2, nullptr, CLSCTX_INPROC_SERVER, IID_PPV_ARGS(&wicFactory)));
-
-        ComPtr<IWICBitmapDecoder> decoder;
-        DX::ThrowIfFailed(wicFactory->CreateDecoderFromFilename(filename, nullptr, GENERIC_READ, WICDecodeMetadataCacheOnDemand, decoder.GetAddressOf()));
-
-        ComPtr<IWICBitmapFrameDecode> frame;
-        DX::ThrowIfFailed(decoder->GetFrame(0, frame.GetAddressOf()));
-
-        DX::ThrowIfFailed(frame->GetSize(&width, &height));
-
-        WICPixelFormatGUID pixelFormat;
-        DX::ThrowIfFailed(frame->GetPixelFormat(&pixelFormat));
-
-        uint32_t rowPitch = width * sizeof(uint32_t);
-        uint32_t imageSize = rowPitch * height;
-
-        std::vector<uint8_t> image;
-        image.resize(size_t(imageSize));
-
-        if (memcmp(&pixelFormat, &GUID_WICPixelFormat32bppBGRA, sizeof(GUID)) == 0)
-        {
-            DX::ThrowIfFailed(frame->CopyPixels(nullptr, rowPitch, imageSize, reinterpret_cast<BYTE*>(image.data())));
-        }
-        else
-        {
-            ComPtr<IWICFormatConverter> formatConverter;
-            DX::ThrowIfFailed(wicFactory->CreateFormatConverter(formatConverter.GetAddressOf()));
-
-            BOOL canConvert = FALSE;
-            DX::ThrowIfFailed(formatConverter->CanConvert(pixelFormat, GUID_WICPixelFormat32bppBGRA, &canConvert));
-            if (!canConvert)
-            {
-                throw std::exception("CanConvert");
-            }
-
-            DX::ThrowIfFailed(formatConverter->Initialize(frame.Get(), GUID_WICPixelFormat32bppBGRA,
-                WICBitmapDitherTypeErrorDiffusion, nullptr, 0, WICBitmapPaletteTypeMedianCut));
-
-            DX::ThrowIfFailed(formatConverter->CopyPixels(nullptr, rowPitch, imageSize, reinterpret_cast<BYTE*>(image.data())));
-        }
-
-        return image;
-    }
-
     // Divide and round up
     static UINT DivUp(UINT a, UINT b)
     {
@@ -95,14 +48,14 @@ namespace
 
     // Maps and copies the contents out of a readback heap.
     template <typename T>
-    std::vector<T> CopyReadbackHeap(ID3D12Resource* readbackHeap)
+    std::vector<T> CopyReadbackHeap(ID3D12Resource *readbackHeap)
     {
         static_assert(std::is_pod_v<T>);
 
         uint64_t sizeInBytes = readbackHeap->GetDesc().Width;
         size_t sizeInElements = static_cast<size_t>(sizeInBytes / sizeof(T));
 
-        void* src;
+        void *src;
         DX::ThrowIfFailed(readbackHeap->Map(0, nullptr, &src));
 
         std::vector<T> dst(sizeInElements);
@@ -129,7 +82,7 @@ namespace
 
     // Given two axis-aligned bounding boxes, computes the area of intersection divided by the area of the union of
     // the two boxes.
-    static float ComputeIntersectionOverUnion(const Prediction& a, const Prediction& b)
+    static float ComputeIntersectionOverUnion(const Prediction &a, const Prediction &b)
     {
         float aArea = (a.xmax - a.xmin) * (a.ymax - a.ymin);
         float bArea = (b.xmax - b.xmin) * (b.ymax - b.ymin);
@@ -151,22 +104,22 @@ namespace
     static std::vector<Prediction> ApplyNonMaximalSuppression(dml::Span<const Prediction> allPredictions, float threshold)
     {
         std::unordered_map<uint32_t, std::vector<Prediction>> predsByClass;
-        for (const auto& pred : allPredictions)
+        for (const auto &pred : allPredictions)
         {
             predsByClass[pred.predictedClass].push_back(pred);
         }
 
         std::vector<Prediction> selected;
 
-        for (auto& kvp : predsByClass)
+        for (auto &kvp : predsByClass)
         {
-            std::vector<Prediction>& proposals = kvp.second;
+            std::vector<Prediction> &proposals = kvp.second;
 
             while (!proposals.empty())
             {
                 // Find the proposal with the highest score
                 auto max_iter = std::max_element(proposals.begin(), proposals.end(),
-                    [](const Prediction& lhs, const Prediction& rhs) {
+                    [](const Prediction &lhs, const Prediction &rhs) {
                         return lhs.score < rhs.score;
                     });
 
@@ -198,20 +151,20 @@ namespace
 
     // Helper function for fomatting strings. Format(os, a, b, c) is equivalent to os << a << b << c.
     template <typename T>
-    std::ostream& Format(std::ostream& os, T&& arg)
+    std::ostream &Format(std::ostream &os, T &&arg)
     {
         return (os << std::forward<T>(arg));
     }
 
     template <typename T, typename... Ts>
-    std::ostream& Format(std::ostream& os, T&& arg, Ts&&... args)
+    std::ostream &Format(std::ostream &os, T &&arg, Ts&&... args)
     {
         os << std::forward<T>(arg);
         return Format(os, std::forward<Ts>(args)...);
     }
 }
 
-Sample::Sample()
+InferenceEngine::InferenceEngine()
     : m_ctrlConnected(false)
 {
     // Use gamma-correct rendering.
@@ -221,7 +174,7 @@ Sample::Sample()
     m_deviceResources->RegisterDeviceNotify(this);
 }
 
-Sample::~Sample()
+InferenceEngine::~InferenceEngine()
 {
     if (m_deviceResources)
     {
@@ -230,7 +183,7 @@ Sample::~Sample()
 }
 
 // Initialize the Direct3D resources required to run.
-void Sample::Initialize(HWND window, int width, int height)
+void InferenceEngine::Initialize(HWND window, int width, int height)
 {
     m_gamePad = std::make_unique<GamePad>();
 
@@ -247,7 +200,7 @@ void Sample::Initialize(HWND window, int width, int height)
 
 #pragma region Frame Update
 // Executes basic render loop.
-void Sample::Tick()
+void InferenceEngine::Tick()
 {
     m_timer.Tick([&]()
     {
@@ -258,7 +211,7 @@ void Sample::Tick()
 }
 
 // Updates the world.
-void Sample::Update(DX::StepTimer const& timer)
+void InferenceEngine::Update(DX::StepTimer const& timer)
 {
     PIXBeginEvent(PIX_COLOR_DEFAULT, L"Update");
 
@@ -325,7 +278,7 @@ void Sample::Update(DX::StepTimer const& timer)
 }
 #pragma endregion
 
-void Sample::GetModelPredictions(
+void InferenceEngine::GetModelPredictions(
     const ModelOutput& modelOutput,
     const YoloV4Constants::BBoxData& constants,
     std::vector<Prediction>* out)
@@ -441,7 +394,7 @@ void Sample::GetModelPredictions(
 
 #pragma region Frame Render
 // Draws the scene.
-void Sample::Render()
+void InferenceEngine::Render()
 {
     // Don't try to render anything before the first Update.
     if (m_timer.GetFrameCount() == 0)
@@ -634,7 +587,7 @@ void Sample::Render()
 }
 
 // Helper method to clear the back buffers.
-void Sample::Clear()
+void InferenceEngine::Clear()
 {
     auto commandList = m_deviceResources->GetCommandList();
     PIXBeginEvent(commandList, PIX_COLOR_DEFAULT, L"Clear");
@@ -658,32 +611,32 @@ void Sample::Clear()
 
 #pragma region Message Handlers
 // Message handlers
-void Sample::OnActivated()
+void InferenceEngine::OnActivated()
 {
 }
 
-void Sample::OnDeactivated()
+void InferenceEngine::OnDeactivated()
 {
 }
 
-void Sample::OnSuspending()
+void InferenceEngine::OnSuspending()
 {
 }
 
-void Sample::OnResuming()
+void InferenceEngine::OnResuming()
 {
     m_timer.ResetElapsedTime();
     m_gamePadButtons.Reset();
     m_keyboardButtons.Reset();
 }
 
-void Sample::OnWindowMoved()
+void InferenceEngine::OnWindowMoved()
 {
     auto r = m_deviceResources->GetOutputSize();
     m_deviceResources->WindowSizeChanged(r.right, r.bottom);
 }
 
-void Sample::OnWindowSizeChanged(int width, int height)
+void InferenceEngine::OnWindowSizeChanged(int width, int height)
 {
     if (!m_deviceResources->WindowSizeChanged(width, height))
         return;
@@ -692,7 +645,7 @@ void Sample::OnWindowSizeChanged(int width, int height)
 }
 
 // Properties
-void Sample::GetDefaultSize(int& width, int& height) const
+void InferenceEngine::GetDefaultSize(int& width, int& height) const
 {
     width = 1920;
     height = 1080;
@@ -701,7 +654,7 @@ void Sample::GetDefaultSize(int& width, int& height) const
 
 #pragma region Direct3D Resources
 // These are the resources that depend on the device.
-void Sample::CreateDeviceDependentResources()
+void InferenceEngine::CreateDeviceDependentResources()
 {
     auto device = m_deviceResources->GetD3DDevice();
 
@@ -722,7 +675,7 @@ void Sample::CreateDeviceDependentResources()
     CreateUIResources();
 }
 
-void Sample::CreateTextureResources()
+void InferenceEngine::CreateTextureResources()
 {
     auto device = m_deviceResources->GetD3DDevice();
         
@@ -898,73 +851,78 @@ void Sample::CreateTextureResources()
         m_indexBufferView.SizeInBytes = sizeof(s_indexData);
     }
 
-    // Create static texture.
-    {
-        auto commandList = m_deviceResources->GetCommandList();
-        commandList->Reset(m_deviceResources->GetCommandAllocator(), nullptr);
-
-        ComPtr<ID3D12Resource> textureUploadHeap;
-    
-        D3D12_RESOURCE_DESC txtDesc = {};
-        txtDesc.MipLevels = txtDesc.DepthOrArraySize = 1;
-        txtDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
-        txtDesc.SampleDesc.Count = 1;
-        txtDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
-
-        wchar_t buff[MAX_PATH] = L"C:\\Users\\ch\\Downloads\\leet.png";
-        // DX::FindMediaFile(buff, MAX_PATH, c_imagePath);
-
-        UINT width, height;
-        std::vector<uint8_t> image = m_windowCapture.Capture(&width, &height); // LoadBGRAImage(buff, width, height);
-        txtDesc.Width = m_origTextureWidth = width;
-        txtDesc.Height = m_origTextureHeight = height;
-
-        DX::ThrowIfFailed(
-            device->CreateCommittedResource(
-                &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
-                D3D12_HEAP_FLAG_NONE,
-                &txtDesc,
-                D3D12_RESOURCE_STATE_COPY_DEST,
-                nullptr,
-                IID_PPV_ARGS(m_texture.ReleaseAndGetAddressOf())));
-
-        const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_texture.Get(), 0, 1);
-
-        // Create the GPU upload buffer.
-        DX::ThrowIfFailed(
-            device->CreateCommittedResource(
-                &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
-                D3D12_HEAP_FLAG_NONE,
-                &CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
-                D3D12_RESOURCE_STATE_GENERIC_READ,
-                nullptr,
-                IID_PPV_ARGS(textureUploadHeap.GetAddressOf())));
-
-        D3D12_SUBRESOURCE_DATA textureData = {};
-        textureData.pData = image.data();
-        textureData.RowPitch = static_cast<LONG_PTR>(txtDesc.Width * sizeof(uint32_t));
-        textureData.SlicePitch = image.size();
-
-        UpdateSubresources(commandList, m_texture.Get(), textureUploadHeap.Get(), 0, 0, 1, &textureData);
-        commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_texture.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ));
-
-        // Describe and create a SRV for the texture.
-        D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
-        srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
-        srvDesc.Format = txtDesc.Format;
-        srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
-        srvDesc.Texture2D.MipLevels = 1;
-        device->CreateShaderResourceView(m_texture.Get(), &srvDesc, m_SRVDescriptorHeap->GetCpuHandle(e_descTexture));
-    
-        DX::ThrowIfFailed(commandList->Close());
-        m_deviceResources->GetCommandQueue()->ExecuteCommandLists(1, CommandListCast(&commandList));
-
-        // Wait until assets have been uploaded to the GPU.
-        m_deviceResources->WaitForGpu();
-    }
+    TakeAndUploadScreenshot();
 }
 
-void Sample::CreateUIResources()
+void InferenceEngine::TakeAndUploadScreenshot()
+{
+    auto device = m_deviceResources->GetD3DDevice();
+
+    auto commandList = m_deviceResources->GetCommandList();
+    commandList->Reset(m_deviceResources->GetCommandAllocator(), nullptr);
+
+    ComPtr<ID3D12Resource> textureUploadHeap;
+
+    D3D12_RESOURCE_DESC txtDesc = {};
+    txtDesc.MipLevels = txtDesc.DepthOrArraySize = 1;
+    txtDesc.Format = DXGI_FORMAT_B8G8R8A8_UNORM;
+    txtDesc.SampleDesc.Count = 1;
+    txtDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
+
+    wchar_t buff[MAX_PATH] = L"C:\\Users\\ch\\Downloads\\leet.png";
+    // DX::FindMediaFile(buff, MAX_PATH, c_imagePath);
+
+    UINT width, height;
+    std::vector<uint8_t> image = m_windowCapture.Capture(&width, &height); // LoadBGRAImage(buff, width, height);
+    txtDesc.Width = m_origTextureWidth = width;
+    txtDesc.Height = m_origTextureHeight = height;
+
+    DX::ThrowIfFailed(
+        device->CreateCommittedResource(
+            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_DEFAULT),
+            D3D12_HEAP_FLAG_NONE,
+            &txtDesc,
+            D3D12_RESOURCE_STATE_COPY_DEST,
+            nullptr,
+            IID_PPV_ARGS(m_texture.ReleaseAndGetAddressOf())));
+
+    const UINT64 uploadBufferSize = GetRequiredIntermediateSize(m_texture.Get(), 0, 1);
+
+    // Create the GPU upload buffer.
+    DX::ThrowIfFailed(
+        device->CreateCommittedResource(
+            &CD3DX12_HEAP_PROPERTIES(D3D12_HEAP_TYPE_UPLOAD),
+            D3D12_HEAP_FLAG_NONE,
+            &CD3DX12_RESOURCE_DESC::Buffer(uploadBufferSize),
+            D3D12_RESOURCE_STATE_GENERIC_READ,
+            nullptr,
+            IID_PPV_ARGS(textureUploadHeap.GetAddressOf())));
+
+    D3D12_SUBRESOURCE_DATA textureData = {};
+    textureData.pData = image.data();
+    textureData.RowPitch = static_cast<LONG_PTR>(txtDesc.Width * sizeof(uint32_t));
+    textureData.SlicePitch = image.size();
+
+    UpdateSubresources(commandList, m_texture.Get(), textureUploadHeap.Get(), 0, 0, 1, &textureData);
+    commandList->ResourceBarrier(1, &CD3DX12_RESOURCE_BARRIER::Transition(m_texture.Get(), D3D12_RESOURCE_STATE_COPY_DEST, D3D12_RESOURCE_STATE_GENERIC_READ));
+
+    // Describe and create a SRV for the texture.
+    D3D12_SHADER_RESOURCE_VIEW_DESC srvDesc = {};
+    srvDesc.Shader4ComponentMapping = D3D12_DEFAULT_SHADER_4_COMPONENT_MAPPING;
+    srvDesc.Format = txtDesc.Format;
+    srvDesc.ViewDimension = D3D12_SRV_DIMENSION_TEXTURE2D;
+    srvDesc.Texture2D.MipLevels = 1;
+    device->CreateShaderResourceView(m_texture.Get(), &srvDesc, m_SRVDescriptorHeap->GetCpuHandle(e_descTexture));
+
+    DX::ThrowIfFailed(commandList->Close());
+    m_deviceResources->GetCommandQueue()->ExecuteCommandLists(1, CommandListCast(&commandList));
+
+    // Wait until assets have been uploaded to the GPU.
+    m_deviceResources->WaitForGpu();
+}
+
+
+void InferenceEngine::CreateUIResources()
 {
     auto device = m_deviceResources->GetD3DDevice();
     
@@ -987,7 +945,7 @@ void Sample::CreateUIResources()
 }
 
 // Allocate all memory resources that change on a window SizeChanged event.
-void Sample::CreateWindowSizeDependentResources()
+void InferenceEngine::CreateWindowSizeDependentResources()
 {
     auto viewport = m_deviceResources->GetScreenViewport();
 
@@ -998,7 +956,7 @@ void Sample::CreateWindowSizeDependentResources()
     m_spriteBatch->SetViewport(viewport);
 }
 
-void Sample::OnDeviceLost()
+void InferenceEngine::OnDeviceLost()
 {
     m_lineEffect.reset();
     m_lineBatch.reset();
@@ -1039,7 +997,7 @@ void Sample::OnDeviceLost()
     m_graphicsMemory.reset();
 }
 
-void Sample::OnDeviceRestored()
+void InferenceEngine::OnDeviceRestored()
 {
     CreateDeviceDependentResources();
 

@@ -15,7 +15,7 @@ using namespace DirectX;
 
 namespace
 {
-    std::unique_ptr<Sample> g_sample;
+    std::unique_ptr<InferenceEngine> g_sample;
 };
 
 LPCWSTR g_szAppName = L"yolov4";
@@ -35,6 +35,14 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
+    //WindowCapture capture;
+    //UINT width, height;
+    //std::vector<uint8_t> buffer = capture.Capture(&width, &height);
+
+    //return 0;
+//}
+#if 1
+
     if (!XMVerifyCPUSupport())
         return 1;
 
@@ -42,7 +50,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
     if (FAILED(initialize))
         return 1;
 
-    g_sample = std::make_unique<Sample>();
+    g_sample = std::make_unique<InferenceEngine>();
 
     // Register class and create window
     {
@@ -115,6 +123,7 @@ int WINAPI wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, 
 
     return (int) msg.wParam;
 }
+#endif
 
 // Windows procedure
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -128,7 +137,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     static bool s_fullscreen = false;
     // Set s_fullscreen to true if defaulting to fullscreen.
 
-    auto sample = reinterpret_cast<Sample*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
+    auto sample = reinterpret_cast<InferenceEngine*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
     switch (message)
     {

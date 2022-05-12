@@ -134,12 +134,12 @@ struct Prediction
 
 // A basic sample implementation that creates a D3D12 device and
 // provides a render loop.
-class Sample final : public DX::IDeviceNotify
+class InferenceEngine final : public DX::IDeviceNotify
 {
 public:
 
-    Sample() noexcept(false);
-    ~Sample();
+    InferenceEngine() noexcept(false);
+    ~InferenceEngine();
 
     // Initialization and management
     void Initialize(HWND window, int width, int height);
@@ -175,6 +175,8 @@ private:
     void InitializeDirectMLResources();
     void CreateUIResources();
     void CreateWindowSizeDependentResources();
+
+    void TakeAndUploadScreenshot();
 
     struct ModelOutput
     {
