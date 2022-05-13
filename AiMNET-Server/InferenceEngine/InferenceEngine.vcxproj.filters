@@ -25,6 +25,9 @@
     <Filter Include="DirectML">
       <UniqueIdentifier>{982f17ec-c546-4299-8af1-62acca46a543}</UniqueIdentifier>
     </Filter>
+    <Filter Include="IPC">
+      <UniqueIdentifier>{2a0f4040-5a04-45fc-90f3-3bbd7c0d935a}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="yolov4.h">
@@ -77,6 +80,9 @@
     </ClInclude>
     <ClInclude Include="WindowCapture.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\IPC\IPCMessage.h">
+      <Filter>IPC</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -33,7 +33,7 @@ private slots:
     void processFinished(int exitCode, QProcess::ExitStatus exitStatus);
 
 protected:
-    void readLine();
+    void readMessage();
 
 private:
     QProcess *_aimnetProc;

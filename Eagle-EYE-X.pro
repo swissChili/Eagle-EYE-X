@@ -1,6 +1,6 @@
 QT += quick websockets
 
-CONFIG += c++14 qmltypes
+CONFIG += c++17 qmltypes
 
 QML_IMPORT_NAME = com.eagleeyex.EagleEYEX
 QML_IMPORT_MAJOR_VERSION = 1
@@ -35,8 +35,4 @@ HEADERS += \
     Overlay.h
 
 LIBS += -luser32 -lkernel32
-OTHER_FILES += AiMNET/*
-
-DISTFILES += \
-    AiMNET/actuator.py \
-    AiMNET/test_input.txt
+INCLUDEPATH += AiMNET-Server/IPC

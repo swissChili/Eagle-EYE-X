@@ -16,6 +16,8 @@
 #include "TensorUtil.h"
 #include "TensorView.h"
 
+#include "IPCMessage.h"
+
 const wchar_t* c_videoPath = L"grca-grand-canyon-association-park-store_1280x720.mp4";
 const wchar_t* c_imagePath = L"grca-BA-bike-shop_1280x720.jpg";
 
@@ -216,7 +218,12 @@ void InferenceEngine::Tick()
     TakeAndUploadScreenshot();
     Render();
 
-    std::cout << "{\"type\": \"batch_done\"}\r\n";
+    IPC::Message message;
+    ZeroMemory(&message, IPC::messageSize);
+
+    message.type = IPC::MessageType::BATCH_DONE;
+
+    std::cout.write((const char *)&message, IPC::messageSize);
     std::cout.flush();
 }
 
@@ -286,14 +293,30 @@ void InferenceEngine::Update(DX::StepTimer const& timer)
 
     PIXEndEvent();
 
-    std::cout << R"({"type": "time", "ms": )" << int(elapsedTime * 1000) << "}\r\n";
+    IPC::Message message;
+    ZeroMemory(&message, IPC::messageSize);
+
+    message.type = IPC::MessageType::TIME;
+    message.time.ms = int(elapsedTime * 1000);
+
+    std::cout.write((const char *)&message, IPC::messageSize);
     std::cout.flush();
 }
 #pragma endregion
 
-void InferenceEngine::LogMessage(std::string message)
+void InferenceEngine::LogMessage(std::string log)
 {
-    std::cout << R"({"type": "log", "message": ")" << message << "\"}\r\n";
+    IPC::Message message;
+    ZeroMemory(&message, IPC::messageSize);
+    
+    message.type = IPC::MessageType::LOG;
+    
+    strncpy_s(message.log.message, IPC::messageBufferLen, log.data(), _TRUNCATE);
+    
+    message.log.message[IPC::messageBufferLen - 1] = '\0';
+    message.log.length = (uint8_t)std::min((uint32_t)log.length(), IPC::messageBufferLen - 1);
+
+    std::cout.write((const char *)&message, IPC::messageSize);
     std::cout.flush();
 }
 
@@ -479,13 +502,15 @@ void InferenceEngine::Render()
         // Print some debug information about the predictions
         if (preds.size() != 0)
         {
-            std::stringstream ss;
-            // Format(ss, "# of predictions: ", preds.size(), "\n");
-            
             for (const auto& pred : preds)
             {
                 if (pred.predictedClass == YoloV4Constants::PersonClass)
                 {
+                    IPC::Message message;
+                    ZeroMemory(&message, IPC::messageSize);
+
+                    message.type = IPC::MessageType::BODY;
+
                     int xmin = static_cast<int>(std::round(pred.xmin));
                     int ymin = static_cast<int>(std::round(pred.ymin));
                     int xmax = static_cast<int>(std::round(pred.xmax));
@@ -496,17 +521,19 @@ void InferenceEngine::Render()
 
                     int headX = xmin + width / 2;
                     int headY = ymin + 12; // head offset
-                    
-                    Format(ss, "{\"type\": \"body\", \"x\": ", xmin, ", \"y\": ", ymin,
-                        ", \"width\": ", width, ", \"height\": ", height,
-                        ", \"headX\": ", headX,
-                        ", \"headY\": ", headY,
-                        "}\r\n");
+
+                    // Give me designated initializers C++!!
+                    message.body.x = (uint16_t)xmin;
+                    message.body.y = (uint16_t)ymin;
+                    message.body.width = (uint16_t)width;
+                    message.body.height = (uint16_t)height;
+                    message.body.headX = (uint16_t)headX;
+                    message.body.headY = (uint16_t)headY;
+
+                    std::cout.write((const char *)&message, IPC::messageSize);
+                    std::cout.flush();
                 }
             }
-
-            std::cout << ss.str();
-            std::cout.flush();
 
             commandList->RSSetViewports(1, &viewport);
             commandList->RSSetScissorRects(1, &scissorRect);

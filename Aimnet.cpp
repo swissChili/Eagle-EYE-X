@@ -1,5 +1,7 @@
 #include "Aimnet.h"
 
+#include <IPCMessage.h>
+
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QDebug>
@@ -51,9 +53,9 @@ QString Aimnet::statusMessage() const
 
 void Aimnet::canRead()
 {
-    while (_aimnetProc->canReadLine())
+    while (_aimnetProc->bytesAvailable() >= IPC::messageSize)
     {
-        readLine();
+        readMessage();
     }
 }
 
@@ -64,19 +66,24 @@ void Aimnet::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
     qDebug() << "stderr" << outerr;
 }
 
-void Aimnet::readLine()
+void Aimnet::readMessage()
 {
-    QByteArray line = _aimnetProc->readLine();
-    QJsonParseError err;
-    QJsonDocument doc = QJsonDocument::fromJson(line, &err);
-
-    if (err.error != QJsonParseError::NoError)
+    if (_aimnetProc->bytesAvailable() < IPC::messageSize)
+    {
         return;
+    }
 
-    QJsonObject object = doc.object();
-    QString type = object["type"].toString();
+    QByteArray messageBuffer = _aimnetProc->read(IPC::messageSize);
 
-    if (type == "body")
+    if (messageBuffer.size() < IPC::messageSize)
+    {
+        qDebug() << "Reading over pipe failed -- not enough bytes";
+        qFatal("Not enough bytes");
+    }
+
+    const IPC::Message &msg = *((IPC::Message *)messageBuffer.data());
+
+    if (msg.type == IPC::MessageType::BODY)
     {
         if (_startOfBatch)
         {
@@ -85,15 +92,18 @@ void Aimnet::readLine()
             _startOfBatch = false;
         }
 
-        emit gotRect(object["x"].toInt(),
-                object["y"].toInt(),
-                object["width"].toInt(),
-                object["height"].toInt());
+        _model.append(QVariantMap{
+                          {"x", msg.body.x},
+                          {"y", msg.body.y},
+                          {"width", msg.body.width},
+                          {"height", msg.body.height},
+                          {"headX", msg.body.headX},
+                          {"headY", msg.body.headY},
+                      });
 
-        _model.append(object.toVariantMap());
         emit modelChanged();
     }
-    else if (type == "batch_done")
+    else if (msg.type == IPC::MessageType::BATCH_DONE)
     {
         if (_startOfBatch)
         {
@@ -104,13 +114,10 @@ void Aimnet::readLine()
         emit batchCleared();
         _startOfBatch = true;
     }
-    else if (type == "time")
+    else if (msg.type == IPC::MessageType::LOG)
     {
-        emit gotTime(object["ms"].toInt());
-    }
-    else if (type == "log")
-    {
-        _statusMessage = object["message"].toString();
+        QString log(msg.log.message);
+        _statusMessage = log;
         emit statusMessageChanged();
     }
 }

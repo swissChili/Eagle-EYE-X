@@ -215,7 +215,7 @@ copy $(ProjectDir)data\. $(OutDir)data</Command>
       <ConformanceMode>false</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);Kits\DirectXTK12\Inc;$(ProjectDir)\..\DirectML;Kits\ATGTK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\IPC;$(ProjectDir);Kits\DirectXTK12\Inc;$(ProjectDir)\..\DirectML;Kits\ATGTK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>4238;4201;4100</DisableSpecificWarnings>
     </ClCompile>
@@ -321,7 +321,7 @@ copy $(ProjectDir)data\. $(OutDir)data</Command>
       <ConformanceMode>false</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);Kits\DirectXTK12\Inc;$(ProjectDir)\..\DirectML;Kits\ATGTK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)\..\IPC;$(ProjectDir);Kits\DirectXTK12\Inc;$(ProjectDir)\..\DirectML;Kits\ATGTK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>4238;4201;4100</DisableSpecificWarnings>
     </ClCompile>
@@ -367,6 +367,7 @@ copy $(ProjectDir)data\. $(OutDir)data</Command>
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="..\DirectML\DirectMLX.h" />
+    <ClInclude Include="..\IPC\IPCMessage.h" />
     <ClInclude Include="DeviceResources.h" />
     <ClInclude Include="Kits\ATGTK\ATGColors.h" />
     <ClInclude Include="Kits\ATGTK\ControllerFont.h" />
