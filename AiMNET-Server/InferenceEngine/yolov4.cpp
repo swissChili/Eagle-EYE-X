@@ -286,7 +286,7 @@ void InferenceEngine::Update(DX::StepTimer const& timer)
 
     PIXEndEvent();
 
-    std::cout << R"({"type": "time", "ms": )" << int(elapsedTime * 1000) << "}\r\n";
+    std::cout << R"({"type": "time", "ms": )" << int(elapsedTime * 1000) << R"(, "fps": )" << m_fps.GetFPS() << " }\r\n";
     std::cout.flush();
 }
 #pragma endregion
@@ -491,6 +491,9 @@ void InferenceEngine::Render()
                     int xmax = static_cast<int>(std::round(pred.xmax));
                     int ymax = static_cast<int>(std::round(pred.ymax));
 
+                    if (PlayerAtEdge(xmin, ymin, xmax, ymax))
+                        continue;
+
                     int width = xmax - xmin;
                     int height = ymax - ymin;
 
@@ -606,6 +609,14 @@ void InferenceEngine::Render()
     PIXEndEvent(m_deviceResources->GetCommandQueue());
 
     m_graphicsMemory->Commit(m_deviceResources->GetCommandQueue());
+}
+
+bool InferenceEngine::PlayerAtEdge(int xmin, int ymin, int xmax, int ymax)
+{
+    int width, height;
+    GetGameSize(&width, &height);
+
+    return ymax > height - 30;
 }
 
 // Helper method to clear the back buffers.

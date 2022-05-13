@@ -108,7 +108,7 @@ Window {
         id: status
         x: 10
         y: 10
-        text: aimnet.statusMessage
+        text: aimnet.statusMessage + " " + String(aimnet.fps)
         color: Style.red
     }
 }

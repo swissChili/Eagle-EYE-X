@@ -181,6 +181,8 @@ private:
     void TakeAndUploadScreenshot();
     void GetGameSize(int *width, int *height);
 
+    bool PlayerAtEdge(int xmin, int ymin, int xmax, int ymax);
+
     void LogMessage(std::string message);
 
     struct ModelOutput

@@ -49,6 +49,11 @@ QString Aimnet::statusMessage() const
     return _statusMessage;
 }
 
+int Aimnet::fps() const
+{
+    return _fps;
+}
+
 void Aimnet::canRead()
 {
     while (_aimnetProc->canReadLine())
@@ -106,7 +111,8 @@ void Aimnet::readLine()
     }
     else if (type == "time")
     {
-        emit gotTime(object["ms"].toInt());
+        _fps = qRound(object["fps"].toDouble());
+        emit fpsChanged();
     }
     else if (type == "log")
     {

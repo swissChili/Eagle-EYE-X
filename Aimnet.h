@@ -13,6 +13,7 @@ class Aimnet : public QObject
 
     Q_PROPERTY(QVariantList model READ model NOTIFY modelChanged)
     Q_PROPERTY(QString statusMessage READ statusMessage NOTIFY statusMessageChanged)
+    Q_PROPERTY(int fps READ fps NOTIFY fpsChanged)
 
 public:
     explicit Aimnet(QObject *parent = nullptr);
@@ -20,6 +21,7 @@ public:
 
     QVariantList model() const;
     QString statusMessage() const;
+    int fps() const;
 
 signals:
     void batchCleared();
@@ -27,6 +29,7 @@ signals:
     void gotTime(int latency);
     void modelChanged();
     void statusMessageChanged();
+    void fpsChanged();
 
 private slots:
     void canRead();
@@ -41,4 +44,5 @@ private:
     QTimer _readTimer;
     bool _startOfBatch = false;
     QString _statusMessage = "";
+    int _fps = 0;
 };
