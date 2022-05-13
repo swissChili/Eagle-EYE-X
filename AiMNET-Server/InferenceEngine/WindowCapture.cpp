@@ -54,57 +54,36 @@ std::vector<uint8_t> WindowCapture::Capture(UINT *width, UINT *height)
 	//buffer.resize(image.GetWidth() * image.GetHeight() * sizeof(uint32_t), 0xFF);
 
 	static wchar_t tempPath[MAX_PATH] = { 0 };
-	GetTempPathW(MAX_PATH, tempPath);
-	std::wstring path = std::wstring(tempPath) + L"\\aimnet-tmp.png";
+	//GetTempPathW(MAX_PATH, tempPath);
+	//std::wstring path = std::wstring(tempPath) + L"\\aimnet-tmp.png";
 
-	DX::ThrowIfFailed(image.Save(path.data()));
+	//DX::ThrowIfFailed(image.Save(path.data()));
 
-	return LoadBGRAImage(path.data(), *width, *height);
+	//return LoadBGRAImage(path.data(), *width, *height);
 
-#if 0
-	BITMAPINFO bitmapInfo = { 0 };
 
-	int firstRes = (GetDIBits(imageDC, image, 0, image.GetHeight(), nullptr, &bitmapInfo, DIB_RGB_COLORS));
+	BITMAPINFOHEADER bmih;
+	ZeroMemory(&bmih, sizeof(BITMAPINFOHEADER));
+	bmih.biSize = sizeof(BITMAPINFOHEADER);
+	bmih.biPlanes = 1;
+	bmih.biBitCount = 32;
+	bmih.biWidth = image.GetWidth();
+	bmih.biHeight = 0 - image.GetHeight();
+	bmih.biCompression = BI_RGB;
+	bmih.biSizeImage = 0;
 
-	UNREFERENCED_PARAMETER(firstRes);
+	int bytesPerPixel = bmih.biBitCount / 8;
 
-	std::memset(&bitmapInfo, 0, sizeof(BITMAPINFO));
+	std::vector<uint8_t> buffer(image.GetWidth() * image.GetHeight() * bytesPerPixel);
 
-	bitmapInfo.bmiHeader.biSize = sizeof(BITMAPINFOHEADER);
-	bitmapInfo.bmiHeader.biWidth = image.GetWidth();
-	bitmapInfo.bmiHeader.biHeight = -image.GetHeight();
-	bitmapInfo.bmiHeader.biPlanes = 1;
-	bitmapInfo.bmiHeader.biBitCount = 32;
-	bitmapInfo.bmiHeader.biCompression = BI_RGB;
-	bitmapInfo.bmiHeader.biSize = (DWORD)buffer.size();
+	BITMAPINFO bmi = { 0 };
+	bmi.bmiHeader = bmih;
 
-	int copied = GetDIBits(imageDC, (HBITMAP)image, 0, image.GetHeight(), buffer.data(), &bitmapInfo, DIB_RGB_COLORS);
+	int row_count = GetDIBits(imageDC, image, 0, image.GetHeight(), buffer.data(), &bmi, DIB_RGB_COLORS);
 
-	if (!copied)
-	{
-		throw std::exception("GetDIBits returned 0");
-	}
+	std::cerr << row_count << std::endl;
 
-	std::cerr << "copied " << copied << std::endl;
-#endif
-
-	//for (int y = 0; y < image.GetHeight(); y++)
-	//{
-	//	for (int x = 0; x < image.GetWidth(); x++)
-	//	{
-	//		COLORREF pixel = image.GetPixel(x, y);
-
-	//		buffer.push_back((pixel >> 16) & 0xFF);
-	//		buffer.push_back((pixel >> 8) & 0xFF);
-	//		buffer.push_back((pixel) & 0xFF);
-	//		buffer.push_back(0xFF);
-
-	//		//buffer.push_back(0xFF);
-	//		//buffer.push_back(0);
-	//		//buffer.push_back(0);
-	//		//buffer.push_back(0xFF);
-	//	}
-	//}
+	return buffer;
 }
 
 void WindowCapture::GetWindowSize(int *width, int *height) const
