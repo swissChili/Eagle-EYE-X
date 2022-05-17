@@ -484,8 +484,11 @@ void InferenceEngine::Render()
             std::stringstream ss;
             // Format(ss, "# of predictions: ", preds.size(), "\n");
             
-            for (const auto& pred : preds)
+#pragma omp parallel for
+            for (int i = 0; i < preds.size(); i++)
             {
+                const auto &pred = preds[i];
+
                 if (pred.predictedClass == YoloV4Constants::PersonClass)
                 {
                     int xmin = static_cast<int>(std::round(pred.xmin));
@@ -502,6 +505,7 @@ void InferenceEngine::Render()
                     int headX = xmin + width / 2;
                     int headY = ymin + 12; // head offset
 
+#pragma omp critical
                     Format(ss, "body ", xmin, " ", ymin, " ", width, " ", height, " ", headX, " ", headY, "\r\n");
                 }
             }
@@ -511,23 +515,6 @@ void InferenceEngine::Render()
 
             commandList->RSSetViewports(1, &viewport);
             commandList->RSSetScissorRects(1, &scissorRect);
-
-            // Draw bounding box outlines
-            m_lineEffect->Apply(commandList);
-            m_lineBatch->Begin(commandList);
-            for (const auto& pred : preds)
-            {
-                VertexPositionColor upperLeft(SimpleMath::Vector3(pred.xmin, pred.ymin, 0.f), ATG::Colors::White);
-                VertexPositionColor lowerLeft(SimpleMath::Vector3(pred.xmin, pred.ymax, 0.f), ATG::Colors::White);
-                VertexPositionColor upperRight(SimpleMath::Vector3(pred.xmax, pred.ymin, 0.f), ATG::Colors::White);
-                VertexPositionColor lowerRight(SimpleMath::Vector3(pred.xmax, pred.ymax, 0.f), ATG::Colors::White);
-
-                m_lineBatch->DrawLine(upperLeft, upperRight);
-                m_lineBatch->DrawLine(upperRight, lowerRight);
-                m_lineBatch->DrawLine(lowerRight, lowerLeft);
-                m_lineBatch->DrawLine(lowerLeft, upperLeft);
-            }
-            m_lineBatch->End();
         }
 
         PIXEndEvent(commandList);
@@ -537,13 +524,6 @@ void InferenceEngine::Render()
     // Kick off the compute work that will be used to render the next frame. We do this now so that the data will be
     // ready by the time the next frame comes around.
     // 
-
-#if USE_VIDEO
-    // Get the latest video frame
-    RECT r = { 0, 0, static_cast<LONG>(m_origTextureWidth), static_cast<LONG>(m_origTextureHeight) };
-    MFVideoNormalizedRect rect = { 0.0f, 0.0f, 1.0f, 1.0f };
-    m_player->TransferFrame(m_sharedVideoTexture, rect, r);
-#endif
 
     // Convert image to tensor format (original texture -> model input)
     {

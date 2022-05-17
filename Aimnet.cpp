@@ -1,4 +1,4 @@
-#include "Aimnet.h"
+ #include "Aimnet.h"
 
 #include <QJsonDocument>
 #include <QJsonObject>
@@ -21,7 +21,7 @@ Aimnet::Aimnet(QObject *parent)
     connect(_aimnetProc, &QProcess::errorOccurred, this, [&](auto err)
     {
         qDebug() << "Error" << err;
-        _statusMessage = "AiMNET Crashed: " + err;
+        _statusMessage = "AiMNET Crashed";
         emit statusMessageChanged();
     });
     connect(_aimnetProc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &Aimnet::processFinished);

@@ -50,11 +50,6 @@ Window {
         height: overlay.height
     }
 
-    Canvas {
-        id: canvas
-        anchors.fill: parent
-    }
-
     Repeater {
         id: rectRepeater
 
@@ -72,14 +67,6 @@ Window {
                 border.color: "#8BBE91"
                 radius: 8
             }
-
-            Rectangle {
-                x: modelData.headX - 2
-                y: modelData.headY - 2
-                color: "yellow"
-                width: 4
-                height: 4
-            }
         }
     }
 
@@ -95,15 +82,8 @@ Window {
     }
 
     Rectangle {
-        anchors.fill: parent
-        color: "transparent"
-        border.color: "red"
-        border.width: 3
-    }
-
-    Rectangle {
         id: statusBg
-        color: Qt.rgba(0, 0, 0, 0.5)
+        color: Qt.rgba(0, 0, 0, 0.75)
         anchors.fill: status
         anchors.margins: -10
         visible: aimnet.statusMessage.length > 0

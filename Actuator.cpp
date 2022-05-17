@@ -57,6 +57,7 @@ ActuatorWorker::ActuatorWorker(QObject *parent)
 
 ActuatorWorker::~ActuatorWorker()
 {
+    _thread->terminate();
     delete _thread;
 }
 
