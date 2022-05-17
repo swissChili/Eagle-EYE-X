@@ -56,10 +56,11 @@ public slots:
 signals:
     void widthChanged();
     void heightChanged();
+    void shouldShootAt(int x, int y, int w, int h);
 
 private:
     int _width = 0, _height = 0;
-    int _minTimeBetweenShots = 40;
+    int _minTimeBetweenShots = 200;
     QTime _lastShot = QTime::currentTime();
     ActuatorWorker *_worker;
 };

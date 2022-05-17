@@ -27,8 +27,8 @@ Aimnet::Aimnet(QObject *parent)
     connect(_aimnetProc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &Aimnet::processFinished);
 
     // _aimnetProc->setProcessChannelMode(QProcess::ForwardedChannels);
-    _aimnetProc->setWorkingDirectory(".\\AiMNET-Server\\x64\\Debug\\InferenceEngine");
-    _aimnetProc->start(".\\AiMNET-Server\\x64\\Debug\\InferenceEngine\\InferenceEngine.exe",
+    _aimnetProc->setWorkingDirectory(".\\AiMNET-Server\\Build\\Release\\InferenceEngine");
+    _aimnetProc->start(".\\AiMNET-Server\\Build\\Release\\InferenceEngine\\InferenceEngine.exe",
                        QStringList(),
                        QIODevice::ReadOnly);
 }
@@ -72,14 +72,10 @@ void Aimnet::processFinished(int exitCode, QProcess::ExitStatus exitStatus)
 void Aimnet::readLine()
 {
     QByteArray line = _aimnetProc->readLine();
-    QJsonParseError err;
-    QJsonDocument doc = QJsonDocument::fromJson(line, &err);
+    QTextStream in(line);
 
-    if (err.error != QJsonParseError::NoError)
-        return;
-
-    QJsonObject object = doc.object();
-    QString type = object["type"].toString();
+    QString type;
+    in >> type;
 
     if (type == "body")
     {
@@ -90,12 +86,20 @@ void Aimnet::readLine()
             _startOfBatch = false;
         }
 
-        emit gotRect(object["x"].toInt(),
-                object["y"].toInt(),
-                object["width"].toInt(),
-                object["height"].toInt());
+        int x, y, width, height, headX, headY;
 
-        _model.append(object.toVariantMap());
+        in >> x >> y >> width >> height >> headX >> headY;
+
+        emit gotRect(x, y, width, height);
+
+        _model.append(QVariantMap{
+                          {"x", x},
+                          {"y", y},
+                          {"width", width},
+                          {"height", height},
+                          {"headX", headX},
+                          {"headY", headY},
+                      });
         emit modelChanged();
     }
     else if (type == "batch_done")
@@ -111,12 +115,13 @@ void Aimnet::readLine()
     }
     else if (type == "time")
     {
-        _fps = qRound(object["fps"].toDouble());
+        float ms;
+        in >> ms >> _fps;
         emit fpsChanged();
     }
     else if (type == "log")
     {
-        _statusMessage = object["message"].toString();
+        _statusMessage = in.readLine();
         emit statusMessageChanged();
     }
 }

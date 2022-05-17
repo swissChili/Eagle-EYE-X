@@ -103,45 +103,44 @@ namespace
     // multiple overlapping predictions.
     static std::vector<Prediction> ApplyNonMaximalSuppression(dml::Span<const Prediction> allPredictions, float threshold)
     {
-        std::unordered_map<uint32_t, std::vector<Prediction>> predsByClass;
+        std::vector<Prediction> personPreds;
+
         for (const auto &pred : allPredictions)
         {
-            predsByClass[pred.predictedClass].push_back(pred);
+            if (pred.predictedClass == YoloV4Constants::PersonClass)
+            {
+                personPreds.push_back(pred);
+            }
         }
 
         std::vector<Prediction> selected;
 
-        for (auto &kvp : predsByClass)
+        while (!personPreds.empty())
         {
-            std::vector<Prediction> &proposals = kvp.second;
+            // Find the proposal with the highest score
+            auto max_iter = std::max_element(personPreds.begin(), personPreds.end(),
+                [](const Prediction &lhs, const Prediction &rhs) {
+                    return lhs.score < rhs.score;
+                });
 
-            while (!proposals.empty())
+            // Move it into the "selected" array
+            selected.push_back(*max_iter);
+            personPreds.erase(max_iter);
+
+            // Compare this selected prediction with all the remaining propsals. Compute their IOU and remove any
+            // that are greater than the threshold.
+            for (auto it = personPreds.begin(); it != personPreds.end(); it)
             {
-                // Find the proposal with the highest score
-                auto max_iter = std::max_element(proposals.begin(), proposals.end(),
-                    [](const Prediction &lhs, const Prediction &rhs) {
-                        return lhs.score < rhs.score;
-                    });
+                float iou = ComputeIntersectionOverUnion(selected.back(), *it);
 
-                // Move it into the "selected" array
-                selected.push_back(*max_iter);
-                proposals.erase(max_iter);
-
-                // Compare this selected prediction with all the remaining propsals. Compute their IOU and remove any
-                // that are greater than the threshold.
-                for (auto it = proposals.begin(); it != proposals.end(); it)
+                if (iou > threshold)
                 {
-                    float iou = ComputeIntersectionOverUnion(selected.back(), *it);
-
-                    if (iou > threshold)
-                    {
-                        // Remove this element
-                        it = proposals.erase(it);
-                    }
-                    else
-                    {
-                        ++it;
-                    }
+                    // Remove this element
+                    it = personPreds.erase(it);
+                }
+                else
+                {
+                    ++it;
                 }
             }
         }
@@ -216,7 +215,7 @@ void InferenceEngine::Tick()
     TakeAndUploadScreenshot();
     Render();
 
-    std::cout << "{\"type\": \"batch_done\"}\r\n";
+    std::cout << "batch_done\r\n";
     std::cout.flush();
 }
 
@@ -286,14 +285,14 @@ void InferenceEngine::Update(DX::StepTimer const& timer)
 
     PIXEndEvent();
 
-    std::cout << R"({"type": "time", "ms": )" << int(elapsedTime * 1000) << R"(, "fps": )" << m_fps.GetFPS() << " }\r\n";
+    std::cout << "time " << int(elapsedTime * 1000) << " " << m_fps.GetFPS() << "\r\n";
     std::cout.flush();
 }
 #pragma endregion
 
 void InferenceEngine::LogMessage(std::string message)
 {
-    std::cout << R"({"type": "log", "message": ")" << message << "\"}\r\n";
+    std::cout << "log " << message << "\r\n";
     std::cout.flush();
 }
 
@@ -314,16 +313,16 @@ void InferenceEngine::GetModelPredictions(
 
     // DirectML writes the final output data in NHWC, where the C channel contains the bounding box & probabilities 
     // for each prediction.
-    const uint32_t predTensorN = modelOutput.desc.sizes[0];
-    const uint32_t predTensorH = modelOutput.desc.sizes[1];
-    const uint32_t predTensorW = modelOutput.desc.sizes[2];
-    const uint32_t predTensorC = modelOutput.desc.sizes[3];
+    const int32_t predTensorN = modelOutput.desc.sizes[0];
+    const int32_t predTensorH = modelOutput.desc.sizes[1];
+    const int32_t predTensorW = modelOutput.desc.sizes[2];
+    //const int32_t predTensorC = modelOutput.desc.sizes[3];
 
     // YoloV4 predicts 3 boxes per scale, so we expect 3 separate predictions here
     assert(predTensorN == 3);
 
     // Width should contain the bounding box x/y/w/h, a confidence score, the probability for max class, and the class index
-    assert(predTensorC == 7);
+    //assert(predTensorC == 7);
 
     struct PotentialPrediction
     {
@@ -346,14 +345,15 @@ void InferenceEngine::GetModelPredictions(
     float xScale = (float)gameWidth / YoloV4Constants::c_inputWidth;
     float yScale = (float)gameHeight / YoloV4Constants::c_inputHeight;
 
-    uint32_t currentPredIndex = 0;
-    for (uint32_t n = 0; n < predTensorN; ++n)
+#pragma omp parallel for
+    for (int32_t n = 0; n < predTensorN; ++n)
     {
-        for (uint32_t h = 0; h < predTensorH; ++h)
+        for (int32_t h = 0; h < predTensorH; ++h)
         {
-            for (uint32_t w = 0; w < predTensorW; ++w)
+            for (int32_t w = 0; w < predTensorW; ++w)
             {
-                const PotentialPrediction& currentPred = tensorData[currentPredIndex++];
+                uint32_t predIndex = (n * predTensorH * predTensorW) + (h * predTensorW) + w;
+                const PotentialPrediction &currentPred = tensorData[predIndex];
 
                 // Discard boxes with low scores
                 float score = currentPred.confidence * currentPred.classMaxProbability;
@@ -407,6 +407,8 @@ void InferenceEngine::GetModelPredictions(
                 pred.ymax = ymax;
                 pred.score = score;
                 pred.predictedClass = currentPred.classIndex;
+
+#pragma omp critical
                 out->push_back(pred);
             }
         }
@@ -499,12 +501,8 @@ void InferenceEngine::Render()
 
                     int headX = xmin + width / 2;
                     int headY = ymin + 12; // head offset
-                    
-                    Format(ss, "{\"type\": \"body\", \"x\": ", xmin, ", \"y\": ", ymin,
-                        ", \"width\": ", width, ", \"height\": ", height,
-                        ", \"headX\": ", headX,
-                        ", \"headY\": ", headY,
-                        "}\r\n");
+
+                    Format(ss, "body ", xmin, " ", ymin, " ", width, " ", height, " ", headX, " ", headY, "\r\n");
                 }
             }
 
@@ -912,7 +910,7 @@ void InferenceEngine::TakeAndUploadScreenshot()
     // DX::FindMediaFile(buff, MAX_PATH, c_imagePath);
 
     UINT width, height;
-    std::vector<uint8_t> image = m_windowCapture.Capture(&width, &height); // LoadBGRAImage(buff, width, height);
+    std::vector<uint8_t> &image = m_windowCapture.Capture(&width, &height); // LoadBGRAImage(buff, width, height);
     txtDesc.Width = m_origTextureWidth = width;
     txtDesc.Height = m_origTextureHeight = height;
 

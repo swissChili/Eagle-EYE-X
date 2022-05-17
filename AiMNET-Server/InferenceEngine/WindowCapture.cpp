@@ -22,7 +22,7 @@ BOOL CALLBACK WindowCapture::EnumProc(HWND testHwnd, WindowCapture *_this)
 	return TRUE;
 }
 
-std::vector<uint8_t> WindowCapture::Capture(UINT *width, UINT *height)
+std::vector<uint8_t> &WindowCapture::Capture(UINT *width, UINT *height)
 {
 	CImage image;
 
@@ -38,7 +38,7 @@ std::vector<uint8_t> WindowCapture::Capture(UINT *width, UINT *height)
 
 	RECT targetSize;
 	GetClientRect(m_target, &targetSize);
-
+	
 	image.Create(targetSize.right, targetSize.bottom, 24);
 
 	CImageDC imageDC(image);
@@ -46,21 +46,6 @@ std::vector<uint8_t> WindowCapture::Capture(UINT *width, UINT *height)
 
 	*width = image.GetWidth();
 	*height = image.GetHeight();
-
-	//LPCTSTR filename = L"C:\\Users\\ch\\Downloads\\aimnet_screenshot.png";
-	//image.Save(filename);
-
-	//std::vector<uint8_t> buffer;
-	//buffer.resize(image.GetWidth() * image.GetHeight() * sizeof(uint32_t), 0xFF);
-
-	static wchar_t tempPath[MAX_PATH] = { 0 };
-	//GetTempPathW(MAX_PATH, tempPath);
-	//std::wstring path = std::wstring(tempPath) + L"\\aimnet-tmp.png";
-
-	//DX::ThrowIfFailed(image.Save(path.data()));
-
-	//return LoadBGRAImage(path.data(), *width, *height);
-
 
 	BITMAPINFOHEADER bmih;
 	ZeroMemory(&bmih, sizeof(BITMAPINFOHEADER));
@@ -74,16 +59,14 @@ std::vector<uint8_t> WindowCapture::Capture(UINT *width, UINT *height)
 
 	int bytesPerPixel = bmih.biBitCount / 8;
 
-	std::vector<uint8_t> buffer(image.GetWidth() * image.GetHeight() * bytesPerPixel);
+	m_buffer.resize(image.GetWidth() * image.GetHeight() * bytesPerPixel);
 
 	BITMAPINFO bmi = { 0 };
 	bmi.bmiHeader = bmih;
 
-	int row_count = GetDIBits(imageDC, image, 0, image.GetHeight(), buffer.data(), &bmi, DIB_RGB_COLORS);
+	GetDIBits(imageDC, image, 0, image.GetHeight(), m_buffer.data(), &bmi, DIB_RGB_COLORS);
 
-	std::cerr << row_count << std::endl;
-
-	return buffer;
+	return m_buffer;
 }
 
 void WindowCapture::GetWindowSize(int *width, int *height) const

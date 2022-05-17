@@ -129,9 +129,11 @@ WeightData WeightLoader::LoadWeightDataFromFile(const wchar_t* path, DX::DeviceR
 
                 // Fold gamma/variance into filter
                 dml::Span<float> filter(weights.filterData.data() + i * filterSize, filterSize);
-                for (float& x : filter)
+                
+#pragma omp parallel for
+                for (int j = 0; j < filter.size(); j++)
                 {
-                    x = gamma * x / sqrt(variance + FLT_EPSILON);
+                    filter[j] = gamma * filter[j] / sqrt(variance + FLT_EPSILON);
                 }
 
                 // Fold beta/mean into bias

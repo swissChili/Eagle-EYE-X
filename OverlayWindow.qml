@@ -50,6 +50,11 @@ Window {
         height: overlay.height
     }
 
+    Canvas {
+        id: canvas
+        anchors.fill: parent
+    }
+
     Repeater {
         id: rectRepeater
 
@@ -108,7 +113,7 @@ Window {
         id: status
         x: 10
         y: 10
-        text: aimnet.statusMessage + " " + String(aimnet.fps)
+        text: aimnet.statusMessage + " " + String(aimnet.fps) + " FPS"
         color: Style.red
     }
 }

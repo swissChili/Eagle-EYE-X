@@ -8,6 +8,7 @@ Actuator::Actuator(QObject *parent)
     : QObject{parent}
     , _worker(new ActuatorWorker())
 {
+    connect(this, &Actuator::shouldShootAt, _worker, &ActuatorWorker::shootAt);
 }
 
 Actuator::~Actuator()
@@ -41,16 +42,17 @@ void Actuator::shootAt(int x, int y)
 {
     if (_lastShot.msecsTo(QTime::currentTime()) > _minTimeBetweenShots)
     {
-        _worker->shootAt(x, y, _width, _height);
+        emit shouldShootAt(x, y, _width, _height);
         _lastShot = QTime::currentTime();
     }
 }
 
 ActuatorWorker::ActuatorWorker(QObject *parent)
-    : QObject(parent)
-    , _thread(new QThread(this))
+    : QObject(nullptr)
+    , _thread(new QThread)
 {
     moveToThread(_thread);
+    _thread->start();
 }
 
 ActuatorWorker::~ActuatorWorker()
@@ -88,12 +90,10 @@ void ActuatorWorker::shootAt(int x, int y, int w, int h)
 
     // moveInParts(pt.x(), pt.y());
 
-    qDebug() << pt;
-
     mouse_event(MOUSEEVENTF_MOVE, pt.x(), pt.y(), 0, 0);
-    QThread::msleep(150);
+    _thread->msleep(150);
     mouse_event(MOUSEEVENTF_LEFTDOWN, pt.x(), pt.y(), 0, 0);
-    QThread::msleep(30);
+    _thread->msleep(30);
     mouse_event(MOUSEEVENTF_LEFTUP, pt.x(), pt.y(), 0, 0);
 }
 
