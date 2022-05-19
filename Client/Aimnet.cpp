@@ -27,8 +27,7 @@ Aimnet::Aimnet(QObject *parent)
     connect(_aimnetProc, QOverload<int, QProcess::ExitStatus>::of(&QProcess::finished), this, &Aimnet::processFinished);
 
     // _aimnetProc->setProcessChannelMode(QProcess::ForwardedChannels);
-    _aimnetProc->setWorkingDirectory(".\\AiMNET-Server\\Build\\Release\\InferenceEngine");
-    _aimnetProc->start(".\\AiMNET-Server\\Build\\Release\\InferenceEngine\\InferenceEngine.exe",
+    _aimnetProc->start(".\\InferenceEngine.exe",
                        QStringList(),
                        QIODevice::ReadOnly);
 }

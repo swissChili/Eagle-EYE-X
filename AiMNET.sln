@@ -9,8 +9,7 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTK12", "InferenceEng
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{51D6113A-6CA7-400F-8BF6-31B3B1698DB4}"
 	ProjectSection(SolutionItems) = preProject
-		Deploy-Client.ps1 = Deploy-Client.ps1
-		Deploy-InferenceEngine.ps1 = Deploy-InferenceEngine.ps1
+		Deploy-All.ps1 = Deploy-All.ps1
 	EndProjectSection
 EndProject
 Global

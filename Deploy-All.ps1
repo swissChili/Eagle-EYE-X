@@ -14,6 +14,14 @@ function Create-DirIfNotExists {
 	}
 }
 
+function Print-Lines {
+	param ( $Message )
+	echo ""
+	echo ==========================================
+	echo "👀 $Message"
+	echo ==========================================
+}
+
 $CurrentDir = (pwd).Path
 $DeployPath = "$CurrentDir\Deploy"
 
@@ -25,6 +33,7 @@ if (! (Test-Path -Path $OutWeightsPath)) {
 	cp ".\InferenceEngine\Data\yolov4.weights" $OutWeightsPath
 }
 
+Print-Lines "Copying InferenceEngine.exe dependencies"
 
 foreach ($Dep in $Deps) {
 	if (! (Test-Path -Path $DeployPath\$Dep)) {
@@ -33,16 +42,13 @@ foreach ($Dep in $Deps) {
 }
 
 cp ".\Build\Release\InferenceEngine\InferenceEngine.exe" $DeployPath
+cp ".\Build\Release\InferenceEngine\DirectML.dll" $DeployPath
+
+Print-Lines "Copying compiled shaders"
+
+cp .\Build\Release\InferenceEngine\*.cso $DeployPath
 
 # Build client
-
-function Print-Lines {
-	param ( $Message )
-	echo ""
-	echo ================================
-	echo $Message
-	echo ================================
-}
 
 Create-DirIfNotExists Build
 Create-DirIfNotExists Build\Client
