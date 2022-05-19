@@ -1,8 +1,3 @@
-//--------------------------------------------------------------------------------------
-// yolov4.cpp
-// Copyright (C) Microsoft Corporation. All rights reserved.
-//--------------------------------------------------------------------------------------
-
 #include "pch.h"
 
 #include "yolov4.h"
@@ -224,61 +219,6 @@ void InferenceEngine::Update(DX::StepTimer const& timer)
     float elapsedTime = float(timer.GetElapsedSeconds());
 
     m_fps.Tick(elapsedTime);
-
-    auto pad = m_gamePad->GetState(0);
-    if (pad.IsConnected())
-    {
-        m_ctrlConnected = true;
-
-        m_gamePadButtons.Update(pad);
-
-        if (pad.IsViewPressed())
-        {
-            ExitApp();
-        }
-
-        if (m_gamePadButtons.x == DirectX::GamePad::ButtonStateTracker::PRESSED && m_player.get() != nullptr)
-        {
-            if (m_player->IsPlaying())
-            {
-                m_player->Pause();
-            }
-            else
-            {
-                m_player->Play();
-            }
-        }
-
-        //const float TriggerR = pad.triggers.right;
-        //const float TriggerL = pad.triggers.left;
-        //const float ThumbLeftX = pad.thumbSticks.leftX;
-        //const float ThumbLeftY = pad.thumbSticks.leftY;
-    }
-    else
-    {
-        m_ctrlConnected = false;
-        m_gamePadButtons.Reset();
-    }
-
-    auto kb = m_keyboard->GetState();
-    m_keyboardButtons.Update(kb);
-
-    if (kb.Escape)
-    {
-        ExitApp();
-    }
-
-    if (m_keyboardButtons.IsKeyPressed(Keyboard::Enter) && m_player.get() != nullptr)
-    {
-        if (m_player->IsPlaying())
-        {
-            m_player->Pause();
-        }
-        else
-        {
-            m_player->Play();
-        }
-    }
 
     PIXEndEvent();
 
@@ -883,9 +823,6 @@ void InferenceEngine::TakeAndUploadScreenshot()
     txtDesc.SampleDesc.Count = 1;
     txtDesc.Dimension = D3D12_RESOURCE_DIMENSION_TEXTURE2D;
 
-    wchar_t buff[MAX_PATH] = L"C:\\Users\\ch\\Downloads\\leet.png";
-    // DX::FindMediaFile(buff, MAX_PATH, c_imagePath);
-
     UINT width, height;
     std::vector<uint8_t> &image = m_windowCapture.Capture(&width, &height); // LoadBGRAImage(buff, width, height);
     txtDesc.Width = m_origTextureWidth = width;
@@ -975,8 +912,6 @@ void InferenceEngine::OnDeviceLost()
     m_lineEffect.reset();
     m_lineBatch.reset();
     m_spriteBatch.reset();
-
-    m_player.reset();
 
     m_texPipelineStateNN.Reset();
     m_texPipelineStateLinear.Reset();

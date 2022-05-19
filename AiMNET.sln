@@ -9,53 +9,25 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DirectXTK12", "InferenceEng
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{51D6113A-6CA7-400F-8BF6-31B3B1698DB4}"
 	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
 		Deploy-All.ps1 = Deploy-All.ps1
+		Readme.md = Readme.md
 	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|ARM = Debug|ARM
-		Debug|ARM64 = Debug|ARM64
 		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|ARM = Release|ARM
-		Release|ARM64 = Release|ARM64
 		Release|x64 = Release|x64
-		Release|x86 = Release|x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Debug|ARM.ActiveCfg = Debug|ARM
-		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Debug|ARM.Build.0 = Debug|ARM
-		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Debug|ARM64.ActiveCfg = Debug|ARM64
-		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Debug|ARM64.Build.0 = Debug|ARM64
 		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Debug|x64.ActiveCfg = Debug|x64
 		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Debug|x64.Build.0 = Debug|x64
-		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Debug|x86.ActiveCfg = Debug|Win32
-		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Debug|x86.Build.0 = Debug|Win32
-		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Release|ARM.ActiveCfg = Release|ARM
-		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Release|ARM.Build.0 = Release|ARM
-		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Release|ARM64.ActiveCfg = Release|ARM64
-		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Release|ARM64.Build.0 = Release|ARM64
 		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Release|x64.ActiveCfg = Release|x64
 		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Release|x64.Build.0 = Release|x64
-		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Release|x86.ActiveCfg = Release|Win32
-		{70CDBD87-F286-4EE0-87F1-5A1D09396CDA}.Release|x86.Build.0 = Release|Win32
-		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Debug|ARM.ActiveCfg = Debug|x64
-		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Debug|ARM.Build.0 = Debug|x64
-		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Debug|ARM64.ActiveCfg = Debug|ARM64
-		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Debug|ARM64.Build.0 = Debug|ARM64
 		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Debug|x64.ActiveCfg = Debug|x64
 		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Debug|x64.Build.0 = Debug|x64
-		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Debug|x86.ActiveCfg = Debug|Win32
-		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Debug|x86.Build.0 = Debug|Win32
-		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Release|ARM.ActiveCfg = Release|x64
-		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Release|ARM.Build.0 = Release|x64
-		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Release|ARM64.ActiveCfg = Release|ARM64
-		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Release|ARM64.Build.0 = Release|ARM64
 		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Release|x64.ActiveCfg = Release|x64
 		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Release|x64.Build.0 = Release|x64
-		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Release|x86.ActiveCfg = Release|Win32
-		{53544B1E-6DE7-4E09-AF14-B1BABE75556E}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

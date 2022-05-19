@@ -1,9 +1,3 @@
-//-----------------------------------------------------------------------------
-//
-//  Copyright (c) Microsoft Corporation. All rights reserved.
-//
-//-----------------------------------------------------------------------------
-
 #pragma once
 
 // Provides a non-owning typed view of an N-dimensional strided tensor over a linear array of elements.

@@ -2,7 +2,6 @@
 
 #include "DeviceResources.h"
 #include "StepTimer.h"
-#include "MediaEnginePlayer.h"
 #include "WeightData.h"
 #include "WindowCapture.h"
 
@@ -224,10 +223,6 @@ private:
     std::unique_ptr<DirectX::BasicEffect>           m_lineEffect;
     std::unique_ptr<DirectX::PrimitiveBatch<DirectX::VertexPositionColor>> m_lineBatch;
     std::unique_ptr<DirectX::SpriteBatch>           m_spriteBatch;
-
-    // Video player
-    std::unique_ptr<MediaEnginePlayer>              m_player;
-    HANDLE                                          m_sharedVideoTexture;
 
     // Direct3D 12 objects for rendering texture to screen
     Microsoft::WRL::ComPtr<ID3D12RootSignature>     m_texRootSignatureNN;           // Nearest-neighbor texture upscale

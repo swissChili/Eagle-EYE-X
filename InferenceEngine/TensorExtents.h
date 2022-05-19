@@ -1,9 +1,3 @@
-//-----------------------------------------------------------------------------
-//
-//  Copyright (c) Microsoft Corporation. All rights reserved.
-//
-//-----------------------------------------------------------------------------
-
 #pragma once
 
 template <size_t DimensionCount> struct TensorExtents {}; // Purposefully undefined
