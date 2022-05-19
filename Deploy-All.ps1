@@ -29,6 +29,10 @@ Create-DirIfNotExists $DeployPath
 
 $OutWeightsPath = "$DeployPath\model_csgo.weights"
 
+Print-Lines "Building Visual Studio projects"
+$env:Platform = "X64"
+msbuild /m /p:Configuration=Release .\AiMNET.sln
+
 if (! (Test-Path -Path $OutWeightsPath)) {
 	cp ".\InferenceEngine\Data\yolov4.weights" $OutWeightsPath
 }
