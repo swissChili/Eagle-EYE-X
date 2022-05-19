@@ -410,11 +410,6 @@ copy $(ProjectDir)data\. $(OutDir)data</Command>
     <Image Include="Assets\atg.ico" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="Kits\DirectXTK12\DirectXTK_Desktop_2017_Win10.vcxproj">
-      <Project>{3e0e8608-cd9b-4c76-af33-29ca38f2c9f0}</Project>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <FxCompile Include="Assets\ImageToTensor.hlsl">
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">imageToTensor</EntryPointName>
       <EntryPointName Condition="'$(Configuration)|$(Platform)'=='Debug|ARM'">imageToTensor</EntryPointName>
@@ -540,6 +535,11 @@ copy $(ProjectDir)data\. $(OutDir)data</Command>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="Kits\DirectXTK12\DirectXTK_Desktop_2022_Win10.vcxproj">
+      <Project>{53544b1e-6de7-4e09-af14-b1babe75556e}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
