@@ -79,3 +79,5 @@ Obj
 Build
 ARM
 InferenceEngine/ARM
+
+*.7z

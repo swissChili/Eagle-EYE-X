@@ -72,6 +72,8 @@ cd $DeployPath
 cp "$ClientBuildPath\release\Eagle-EYE-X.exe" .
 windeployqt Eagle-EYE-X.exe --qmldir $ClientQmlDir
 
+rm vc_redist.x64.exe
+
 Print-Lines "DONE ✅
 All files built to $DeployPath"
 
