@@ -39,6 +39,7 @@
 #include <d3d12.h>
 #include <d3d11_1.h>
 #include <d3d10.h>
+#include <DescriptorHeap.h>
 
 #if defined(NTDDI_WIN10_RS2)
 #include <dxgi1_6.h>
@@ -95,7 +96,7 @@
 
 #define DML_TARGET_VERSION_USE_LATEST
 #include "DirectML.h"
-#include "DirectMLX.h"
+#include "../DirectML/DirectMLX.h"
 
 // Use video frames as input to the DirectML model, instead of a static texture.
 #define USE_VIDEO 0 // 1

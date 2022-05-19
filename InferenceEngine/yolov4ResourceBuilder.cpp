@@ -470,7 +470,7 @@ void InferenceEngine::CreateDirectMLResources()
 
         // Load the model weights from file
         LogMessage("Loading Model");
-        m_modelWeights = model.LoadWeightDataFromFile(LR"(.\Data\yolov4.weights)", m_deviceResources.get());
+        m_modelWeights = model.LoadWeightDataFromFile(LR"(.\model_csgo.weights)", m_deviceResources.get());
 
         // Compile the model into a DML graph
         DML_EXECUTION_FLAGS executionFlags = DML_EXECUTION_FLAG_ALLOW_HALF_PRECISION_COMPUTATION;

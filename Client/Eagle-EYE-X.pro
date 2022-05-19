@@ -1,4 +1,4 @@
-QT += quick websockets
+QT += quick
 
 CONFIG += c++14 qmltypes
 
@@ -24,19 +24,9 @@ QML_IMPORT_PATH =
 # Additional import path used to resolve QML modules just for Qt Quick Designer
 QML_DESIGNER_IMPORT_PATH =
 
-# Default rules for deployment.
-qnx: target.path = /tmp/$${TARGET}/bin
-else: unix:!android: target.path = /opt/$${TARGET}/bin
-!isEmpty(target.path): INSTALLS += target
-
 HEADERS += \
     Actuator.h \
     Aimnet.h \
     Overlay.h
 
 LIBS += -luser32 -lkernel32
-OTHER_FILES += AiMNET/*
-
-DISTFILES += \
-    AiMNET/actuator.py \
-    AiMNET/test_input.txt

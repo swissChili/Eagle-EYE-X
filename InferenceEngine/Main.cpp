@@ -29,6 +29,12 @@ extern "C"
     __declspec(dllexport) int AmdPowerXpressRequestHighPerformance = 1;
 }
 
+// Exit helper
+void ExitApp()
+{
+    PostQuitMessage(0);
+}
+
 // Entry point
 int WINAPI main()
 {
@@ -94,11 +100,19 @@ int WINAPI main()
         //ShowWindow(hwnd, SW_NORMAL);
         // Change nCmdShow to SW_SHOWMAXIMIZED to default to fullscreen.
 
-        SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(g_inference.get()) );
-
         GetClientRect(hwnd, &rc);
 
-        g_inference->Initialize(hwnd, rc.right - rc.left, rc.bottom - rc.top);
+        try
+        {
+            g_inference->Initialize(hwnd, rc.right - rc.left, rc.bottom - rc.top);
+        }
+        catch (std::exception &e)
+        {
+            std::cerr << "log Error initializing InferenceEngine: " << e.what() << "\r\n";
+            std::cout.flush();
+
+            abort();
+        }
     }
 
     // Main message loop
@@ -112,7 +126,17 @@ int WINAPI main()
         }
         else
         {
-            g_inference->Tick();
+            try
+            {
+                g_inference->Tick();
+            }
+            catch (std::exception &e)
+            {
+                std::cerr << "log Error: " << e.what() << "\r\n";
+                std::cout.flush();
+
+                ExitApp();
+            }
         }
     }
 
@@ -136,26 +160,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     static bool s_fullscreen = false;
     // Set s_fullscreen to true if defaulting to fullscreen.
 
-    auto inference = reinterpret_cast<InferenceEngine*>(GetWindowLongPtr(hWnd, GWLP_USERDATA));
 
     switch (message)
     {
     case WM_PAINT:
-        if (s_in_sizemove && inference)
-        {
-            inference->Tick();
-        }
-        else
-        {
-            hdc = BeginPaint(hWnd, &ps);
-            EndPaint(hWnd, &ps);
-        }
+        hdc = BeginPaint(hWnd, &ps);
+        EndPaint(hWnd, &ps);
         break;
 
     case WM_MOVE:
-        if (inference)
+        if (g_inference)
         {
-            inference->OnWindowMoved();
+            g_inference->OnWindowMoved();
         }
         break;
 
@@ -165,21 +181,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             if (!s_minimized)
             {
                 s_minimized = true;
-                if (!s_in_suspend && inference)
-                    inference->OnSuspending();
+                if (!s_in_suspend && g_inference)
+                    g_inference->OnSuspending();
                 s_in_suspend = true;
             }
         }
         else if (s_minimized)
         {
             s_minimized = false;
-            if (s_in_suspend && inference)
-                inference->OnResuming();
+            if (s_in_suspend && g_inference)
+                g_inference->OnResuming();
             s_in_suspend = false;
         }
-        else if (!s_in_sizemove && inference)
+        else if (!s_in_sizemove && g_inference)
         {
-            inference->OnWindowSizeChanged(LOWORD(lParam), HIWORD(lParam));
+            g_inference->OnWindowSizeChanged(LOWORD(lParam), HIWORD(lParam));
         }
         break;
 
@@ -189,12 +205,12 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
     case WM_EXITSIZEMOVE:
         s_in_sizemove = false;
-        if (inference)
+        if (g_inference)
         {
             RECT rc;
             GetClientRect(hWnd, &rc);
 
-            inference->OnWindowSizeChanged(rc.right - rc.left, rc.bottom - rc.top);
+            g_inference->OnWindowSizeChanged(rc.right - rc.left, rc.bottom - rc.top);
         }
         break;
 
@@ -207,18 +223,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         break;
 
     case WM_ACTIVATEAPP:
-        if (inference)
+        if (g_inference)
         {
             Keyboard::ProcessMessage(message, wParam, lParam);
             Mouse::ProcessMessage(message, wParam, lParam);
 
             if (wParam)
             {
-                inference->OnActivated();
+                g_inference->OnActivated();
             }
             else
             {
-                inference->OnDeactivated();
+                g_inference->OnDeactivated();
             }
         }
         break;
@@ -227,16 +243,16 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         switch (wParam)
         {
         case PBT_APMQUERYSUSPEND:
-            if (!s_in_suspend && inference)
-                inference->OnSuspending();
+            if (!s_in_suspend && g_inference)
+                g_inference->OnSuspending();
             s_in_suspend = true;
             return TRUE;
 
         case PBT_APMRESUMESUSPEND:
             if (!s_minimized)
             {
-                if (s_in_suspend && inference)
-                    inference->OnResuming();
+                if (s_in_suspend && g_inference)
+                    g_inference->OnResuming();
                 s_in_suspend = false;
             }
             return TRUE;
@@ -281,8 +297,3 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-// Exit helper
-void ExitSample()
-{
-    PostQuitMessage(0);
-}

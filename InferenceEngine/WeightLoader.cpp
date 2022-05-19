@@ -131,7 +131,7 @@ WeightData WeightLoader::LoadWeightDataFromFile(const wchar_t* path, DX::DeviceR
                 dml::Span<float> filter(weights.filterData.data() + i * filterSize, filterSize);
                 
 #pragma omp parallel for
-                for (int j = 0; j < filter.size(); j++)
+                for (int j = 0; j < (int)filter.size(); j++)
                 {
                     filter[j] = gamma * filter[j] / sqrt(variance + FLT_EPSILON);
                 }

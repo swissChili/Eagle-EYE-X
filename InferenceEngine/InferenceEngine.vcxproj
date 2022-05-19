@@ -215,7 +215,7 @@ copy $(ProjectDir)data\. $(OutDir)data</Command>
       <ConformanceMode>false</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);Kits\DirectXTK12\Inc;$(ProjectDir)\..\DirectML;Kits\ATGTK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);Kits\DirectXTK12\Inc;$(ProjectDir)..\DirectML;Kits\ATGTK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>4238;4201;4100</DisableSpecificWarnings>
       <OpenMPSupport>true</OpenMPSupport>
@@ -226,8 +226,7 @@ copy $(ProjectDir)data\. $(OutDir)data</Command>
       <AdditionalDependencies>d3d12.lib;dxgi.lib;dxguid.lib;d3d11.lib;uuid.lib;kernel32.lib;user32.lib;gdi32.lib;gdiplus.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;mfplat.lib;odbc32.lib;odbccp32.lib;runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(OutDir)data
-copy $(ProjectDir)data\. $(OutDir)data</Command>
+      <Command>copy $(ProjectDir)data\yolov4.weights $(OutDir)\model_csgo.weights</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|ARM64'">
@@ -322,7 +321,7 @@ copy $(ProjectDir)data\. $(OutDir)data</Command>
       <ConformanceMode>false</ConformanceMode>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <TreatWarningAsError>true</TreatWarningAsError>
-      <AdditionalIncludeDirectories>$(ProjectDir);Kits\DirectXTK12\Inc;$(ProjectDir)\..\DirectML;Kits\ATGTK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir);Kits\DirectXTK12\Inc;$(ProjectDir)..\DirectML;Kits\ATGTK;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <DisableSpecificWarnings>4238;4201;4100</DisableSpecificWarnings>
       <OpenMPSupport>true</OpenMPSupport>
@@ -335,8 +334,7 @@ copy $(ProjectDir)data\. $(OutDir)data</Command>
       <AdditionalDependencies>d3d12.lib;dxgi.lib;dxguid.lib;d3d11.lib;uuid.lib;kernel32.lib;user32.lib;gdi32.lib;gdiplus.lib;winspool.lib;comdlg32.lib;advapi32.lib;shell32.lib;ole32.lib;oleaut32.lib;mfplat.lib;odbc32.lib;odbccp32.lib;runtimeobject.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
     <PostBuildEvent>
-      <Command>mkdir $(OutDir)data
-copy $(ProjectDir)data\. $(OutDir)data</Command>
+      <Command>copy $(ProjectDir)data\yolov4.weights $(OutDir)\model_csgo.weights</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|ARM64'">

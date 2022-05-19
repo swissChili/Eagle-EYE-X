@@ -16,10 +16,7 @@
 #include "TensorUtil.h"
 #include "TensorView.h"
 
-const wchar_t* c_videoPath = L"grca-grand-canyon-association-park-store_1280x720.mp4";
-const wchar_t* c_imagePath = L"grca-BA-bike-shop_1280x720.jpg";
-
-extern void ExitSample();
+extern void ExitApp();
 
 using namespace DirectX;
 
@@ -237,7 +234,7 @@ void InferenceEngine::Update(DX::StepTimer const& timer)
 
         if (pad.IsViewPressed())
         {
-            ExitSample();
+            ExitApp();
         }
 
         if (m_gamePadButtons.x == DirectX::GamePad::ButtonStateTracker::PRESSED && m_player.get() != nullptr)
@@ -268,7 +265,7 @@ void InferenceEngine::Update(DX::StepTimer const& timer)
 
     if (kb.Escape)
     {
-        ExitSample();
+        ExitApp();
     }
 
     if (m_keyboardButtons.IsKeyPressed(Keyboard::Enter) && m_player.get() != nullptr)
@@ -485,7 +482,7 @@ void InferenceEngine::Render()
             // Format(ss, "# of predictions: ", preds.size(), "\n");
             
 #pragma omp parallel for
-            for (int i = 0; i < preds.size(); i++)
+            for (int i = 0; i < (int)preds.size(); i++)
             {
                 const auto &pred = preds[i];
 

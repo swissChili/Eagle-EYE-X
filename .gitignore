@@ -69,3 +69,13 @@ AiMNET/yolo*
 
 */Build
 */Obj
+
+.vs
+x64
+packages
+
+Deploy
+Obj
+Build
+ARM
+InferenceEngine/ARM
