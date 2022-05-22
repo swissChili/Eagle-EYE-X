@@ -11,7 +11,7 @@ Window {
            Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint | Qt.Sheet | Qt.WindowTransparentForInput
     color: "transparent"
 
-    visible: true
+    visible: overlay.hasFocus
 
     x: overlay.x
     y: overlay.y
@@ -26,6 +26,10 @@ Window {
         id: aimnet
 
         onModelChanged: {
+            if (!overlay.hasFocus)
+                return;
+
+
             for (let {headX, headY} of model)
             {
                 if (withinReticle(headX, headY))
@@ -89,7 +93,7 @@ Window {
         visible: aimnet.statusMessage.length > 0
     }
 
-    Label {
+    AiLabel {
         id: status
         x: 10
         y: 10

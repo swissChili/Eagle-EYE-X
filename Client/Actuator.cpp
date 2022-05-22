@@ -74,7 +74,7 @@ void ActuatorWorker::moveInParts(int dx, int dy)
         int yInt = qMin(dy - realY, _moveInterval);
 
         mouse_event(MOUSEEVENTF_MOVE, xInt, yInt, 0, 0);
-        QThread::msleep(timePerInterval);
+        _thread->msleep(timePerInterval);
 
         realX += xInt;
         realY += yInt;
@@ -89,10 +89,10 @@ void ActuatorWorker::shootAt(int x, int y, int w, int h)
     QPoint pt = {x - cursorX, y - cursorY};
     pt *= multiplier();
 
-    // moveInParts(pt.x(), pt.y());
+     moveInParts(pt.x(), pt.y());
 
-    mouse_event(MOUSEEVENTF_MOVE, pt.x(), pt.y(), 0, 0);
-    _thread->msleep(150);
+//    mouse_event(MOUSEEVENTF_MOVE, pt.x(), pt.y(), 0, 0);
+//    _thread->msleep(150);
     mouse_event(MOUSEEVENTF_LEFTDOWN, pt.x(), pt.y(), 0, 0);
     _thread->msleep(30);
     mouse_event(MOUSEEVENTF_LEFTUP, pt.x(), pt.y(), 0, 0);

@@ -48,6 +48,8 @@ static BOOL CALLBACK Overlay_windEnumFunc(HWND testHwnd, HWND *storeHwnd)
 
     if (string.startsWith("Counter-Strike: Global Offensive"))
     {
+        qDebug() << "Found CSGO window";
+
         *storeHwnd = testHwnd;
         return FALSE;
     }
@@ -62,6 +64,12 @@ void Overlay::updatePosition()
     if (hwnd == nullptr)
     {
         EnumWindows((WNDENUMPROC)Overlay_windEnumFunc, (LPARAM)&hwnd);
+    }
+
+    if (hwnd == nullptr)
+    {
+        setFocus(false);
+        return;
     }
 
     RECT wndRect;
@@ -88,13 +96,15 @@ void Overlay::updatePosition()
         emit yChanged();
     }
 
-    bool nextFocus = GetActiveWindow() == hwnd;
+    HWND activeWindow = GetForegroundWindow();
+    setFocus(activeWindow == hwnd);
+}
 
-    if (nextFocus != _hasFocus)
+void Overlay::setFocus(bool focus)
+{
+    if (focus != _hasFocus)
     {
-        qDebug() << _hasFocus << nextFocus;
-
-        _hasFocus = nextFocus;
+        _hasFocus = focus;
         emit hasFocusChanged();
     }
 }

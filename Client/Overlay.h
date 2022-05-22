@@ -36,6 +36,8 @@ private slots:
     void updatePosition();
 
 private:
+    void setFocus(bool focus);
+
     QString _windowName;
     int _width = 10, _height = 10, _x = 100, _y = 100;
     QTimer _timer;

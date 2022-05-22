@@ -23,7 +23,7 @@ protected:
     double multiplier();
 
 private:
-    int _overallTime = 8;
+    int _overallTime = 100;
     int _moveInterval = 60;
     double _sens = 1.7;
 

@@ -285,8 +285,10 @@ void InferenceEngine::GetModelPredictions(
 #pragma omp parallel for
     for (int32_t n = 0; n < predTensorN; ++n)
     {
+#pragma omp parallel for
         for (int32_t h = 0; h < predTensorH; ++h)
         {
+#pragma omp parallel for
             for (int32_t w = 0; w < predTensorW; ++w)
             {
                 uint32_t predIndex = (n * predTensorH * predTensorW) + (h * predTensorW) + w;

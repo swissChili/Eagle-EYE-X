@@ -4,7 +4,9 @@
         <file>Shadow.qml</file>
         <file>Style.qml</file>
         <file>qmldir</file>
-        <file>Label.qml</file>
+        <file>AiLabel.qml</file>
         <file>OverlayWindow.qml</file>
+        <file>SliderOption.qml</file>
+        <file>SwitchOption.qml</file>
     </qresource>
 </RCC>
